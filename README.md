@@ -1,2 +1,2 @@
-# panda-framwork
+# Vanilla-framwork
 simple  php MVC framework
