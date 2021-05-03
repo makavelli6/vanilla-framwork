@@ -1,0 +1,13 @@
+{
+    "name": "adigah/vanilla-framwork",
+    "description": "simple light weight php framework",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "makavelli6",
+            "email": "adigahjosh@gmail.com"
+        }
+    ],
+    "require": {}
+}

@@ -3,14 +3,15 @@ RewriteEngine On
 php_value upload_max_filesize "50M"
 php_value post_max_size "20M"
 
-RewriteBase /SimpleMVC
+RewriteEngine On
+RewriteBase /
 
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-l
 
-
 RewriteCond %{THE_REQUEST} /Public/([^\s?]*) [NC]
+
 RewriteRule ^Public/(.*)$ /$1 [L,R=301]
 
 RewriteRule ^(.*)$ Public/index.php?url=$1 [QSA,L]

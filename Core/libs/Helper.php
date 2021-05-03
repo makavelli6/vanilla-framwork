@@ -9,9 +9,11 @@ class Helper
 {
 	public static function LoadConfig($file)
 	{
-		
-		if(!file_exists($file.'.conf')){
+		if(!file_exists($file)){
+
+			echo('//////////////////////////////////////');
 			Log::Error("config file does not exist".PHP_EOL);
+			echo('//////////////////////////////////////');
 			echo ($file.PHP_EOL);
 			echo "-------SOLUTION------".PHP_EOL.PHP_EOL;
 			Log::Info("Run: php builder cofig:init ".PHP_EOL.PHP_EOL);
@@ -19,7 +21,7 @@ class Helper
 			die();
 
 		}
-		return Json::decode_file($file.'.conf');
+		return Json::decode_file($file);
 	}
 
 	public static function SetConfig($file, $data)

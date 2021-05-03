@@ -22,6 +22,7 @@ class Session
 	}
 	public static function get($key)
 	{
+		@session_start();
 		if(isset($_SESSION[$key]))
 		return $_SESSION[$key];
 	}
@@ -33,8 +34,8 @@ class Session
 	}
 	public static function destroy()
 	{
-		//unset($_SESSION);
-		session_destroy();
+		unset($_SESSION['loggedIn']);
+		@session_destroy();
 	}
 	public static function flash($key, $val = '')
     {

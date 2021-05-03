@@ -1,11 +1,40 @@
 <?php 
 
 require_once 'path.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/Core/libs/Helper.php';
+
 //PATHS
 //DO NT fORGET BACKSLASH (/) after path
 //define('URL','/AudioPlug/');
-define('SITE','http://localhost/simpleMVC/');
-define('URL','http://localhost/simpleMVC/');
+function LoadConfig($file){
+	if(!file_exists($file)){
+        Log::Error("config file does not exist".PHP_EOL.'<br>');
+        echo ($file.PHP_EOL);
+        echo "-------SOLUTION------".PHP_EOL.PHP_EOL.'<br>';
+        Log::Info("Run: php builder cofig:init ".PHP_EOL.PHP_EOL.'<br>');
+        echo "---------------------".PHP_EOL.'<br>';
+        die();
+
+	}
+	return Json::decode_file($file);
+}
+
+$db = LoadConfig(__DIR__.'/db.conf');
+
+define('SITE','/');
+define('URL','/'); 
+
+define('DB_TYPE',$db['DB_TYPE']);
+define('DB_HOST',$db['DB_HOST']);
+define('DB_NAME',$db['DB_NAME']);
+define('DB_USER',$db['DB_USER']);
+define('DB_PASS',$db['DB_PASS']);
+
+
+
+//if local host use
+//define('SITE','http://localhost/simpleMVC/');
+//define('URL','http://localhost/simpleMVC/'); 
 
 define('ENC_KEY','CKXH2U9RPY3EFD70TLS1ZG4N8WQBOVI6AMJ5');
 

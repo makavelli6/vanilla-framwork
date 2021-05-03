@@ -11,7 +11,7 @@ class Database extends PDO
 	{
 		parent::__construct($db_type.':host='.$db_host.';dbname='.$db_name,$db_user,$db_pas);
 		$this->_dbName = $db_name;
-		//parent::settAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTIONS);
+		//parent::setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTIONS);
 	}
 
 	/**
@@ -60,6 +60,17 @@ class Database extends PDO
 		$sth->execute();
 
 
+	}
+
+	public function selectOne($sql, $array = array(), $fetchMode = PDO::FETCH_ASSOC)
+	{
+		$sth = $this->prepare($sql);
+		foreach ($array as $key => $value) {
+			$sth->bindValue("$key", $value);
+		}
+		
+		$sth->execute();
+		return $sth->fetch($fetchMode);
 	}
 
 
