@@ -9,10 +9,10 @@ require_once $_SERVER['DOCUMENT_ROOT'].'/Core/libs/Helper.php';
 function LoadConfig($file){
 	if(!file_exists($file)){
         Log::Error("config file does not exist".PHP_EOL.'<br>');
-        echo ($file.PHP_EOL);
-        echo "-------SOLUTION------".PHP_EOL.PHP_EOL.'<br>';
-        Log::Info("Run: php builder cofig:init ".PHP_EOL.PHP_EOL.'<br>');
-        echo "---------------------".PHP_EOL.'<br>';
+        Log::Info ($file);
+        Log::Success( "-------SOLUTION------");
+        Log::Success("Run: php builder cofig:init ");
+        Log::Success("---------------------");
         die();
 
 	}

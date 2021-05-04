@@ -1,22 +1,23 @@
+
 <?php
 
 class Log{
     public static function Error($str)
     {
-        echo "\033[31m$str \033[0m\n";
+        echo "<span style='color: red;'>$str</span><br>";
     }
     public static function Success($str)
     {
-        echo "\033[32m$str \033[0m\n";
+        echo "<span style='color: greenyellow; background-color: black;'>$str</span><br>";
     }
     public static function Warning($str)
     {
-        echo "\033[33m$str \033[0m\n";
+        echo "<span style='color: gold;'>$str</span><br>";
     }
     
     public static function Info($str)
     {
-        echo "\033[36m$str \033[0m\n";
+        echo "<span style='color: cyan; background-color: black;'>$str</span><br>";
     }
 }
 ?>
