@@ -3,14 +3,22 @@
 
 class CommandCall
 {
+    /** @var string  */
     public $command;
 
+    /** @var string */
     public $subcommand;
 
+    /** @var array */
     public $args = [];
 
+    /** @var array */
     public $params = [];
 
+    /**
+     * CommandCall constructor.
+     * @param array $argv
+     */
     public function __construct(array $argv)
     {
         $this->args = $argv;
@@ -20,6 +28,9 @@ class CommandCall
         $this->loadParams($argv);
     }
 
+    /**
+     * @param array $args
+     */
     protected function loadParams(array $args)
     {
         foreach ($args as $arg) {
@@ -30,12 +41,19 @@ class CommandCall
         }
     }
 
+    /**
+     * @param string $param
+     * @return bool
+     */
     public function hasParam($param)
     {
         return isset($this->params[$param]);
     }
 
-
+    /**
+     * @param string $param
+     * @return string|null
+     */
     public function getParam($param)
     {
         return $this->hasParam($param) ? $this->params[$param] : null;
