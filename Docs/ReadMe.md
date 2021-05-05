@@ -1,8 +1,2 @@
-cli tools
-php builder init|Server
-php builder init|DataBase
-
-
-php builder migration|run
-php builder migration|clear
-php builder migration|refress 
+the  builder  pluggin is  being replaced with  an improved  secure cli tool called  vannilla
+A key  value  database  was also  added and completed 

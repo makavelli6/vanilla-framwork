@@ -50,9 +50,23 @@ class File
 		$content_chunks = explode($string_to_replace,$content);
 		$content = implode($replace_with, $content_chunks);
 		file_put_contents($filename,$content);
-
 	}
+	public static function handleFile( $dir )
+	{
+		if(!file_exists($dir)){
+			$handle = fopen($dir, "x+");
+			if ($handle==FALSE) {
+				return 0;
+			}
+				fclose($handle);
+			}
+	}
+	public static function handleDir( $dir )
+	{
+		
+	}
+
 
 }
 
- ?>
+?>
