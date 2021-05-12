@@ -1,5 +1,9 @@
 <?php 
 
+if(file_exists(ROOT.'vendor/autoload.php')){
+	require ROOT.'vendor/autoload.php';	
+}
+
 spl_autoload_register('api_auto_load');
 function api_auto_load($className){
 	$fullpath  = ROOT.CORE_LIB.$className.".php";
