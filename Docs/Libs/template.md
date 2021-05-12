@@ -101,5 +101,7 @@ Remember to update the *$cache_enabled* and *$cache_path* variables, the caching
 ```php
 $this->tempate->cache_enabled = false;
 $this->tempate->cache_path = '/yourpath/';
+$this->tempate->file_ext = '.html';
+
 
 ```

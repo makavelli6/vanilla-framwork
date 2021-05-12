@@ -7,7 +7,8 @@ class Template {
 	public $blocks = array();
 	public $cache_path = 'cache/';
 	public $cache_enabled = FALSE;
-	
+	public $file_ext = '.html';
+
 
 	function view($file, $data = array()) {
 		$cached_file = $this.cache($file);
@@ -19,7 +20,7 @@ class Template {
 		if (!file_exists($this.$cache_path)) {
 		  	mkdir($this.$cache_path, 0744);
 		}
-	    $cached_file = $this.$cache_path . str_replace(array('/', '.html'), array('_', ''), $file . '.php');
+	    $cached_file = $this.$cache_path . str_replace(array('/', $file_ext), array('_', ''), $file . '.php');
 	    if (!$this.$cache_enabled || !file_exists($cached_file) || filemtime($cached_file) < filemtime($file)) {
 			$code = $this.includeFiles($file);
 			$code = $this.compileCode($code);
