@@ -6,3 +6,8 @@ Adding  Colors and Animations Progress Bars to Vanilla Cli
 Adding Im
 
 proved Migrations To Vanilla { Run Create Refress Clear}
+Tempaling 
+system now supported it follows the twig templating sytax
+the legacy default veiw has not bee reomved
+if statement and loop are also supported
+
