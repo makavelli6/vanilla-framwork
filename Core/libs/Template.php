@@ -45,7 +45,7 @@ class Template {
 	}
 
 	function includeFiles($file) {
-		$code = file_get_contents($file);
+		$code = file_get_contents( ROOT.'/App/templates/'.$file);
 		preg_match_all('/{% ?(extends|include) ?\'?(.*?)\'? ?%}/i', $code, $matches, PREG_SET_ORDER);
 		foreach ($matches as $value) {
 			$code = str_replace($value[0], $this.includeFiles($value[2]), $code);

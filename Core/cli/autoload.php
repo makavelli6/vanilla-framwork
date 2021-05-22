@@ -1,6 +1,7 @@
 <?php
 
 spl_autoload_register('api_auto_load');
+
 function api_auto_load($temp){
     $temp = strtolower($temp);
     $className = ucfirst($temp);

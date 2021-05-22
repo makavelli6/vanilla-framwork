@@ -116,28 +116,35 @@ class Database extends PDO
 		
 
 	}
-	public function applyMigration($value='')
+	public function applyMigration($value)
 	{
+		echo "creating  ";
 		$this->createMigrationTable();
+		echo "getting  ";
 		$appliedMig = $this->getAppliedMigrations();
 
-
+		echo "scaning \n  ";
 		$files = scandir($value.'/Migrations');
 		$toApply = array_diff($files, $appliedMig);
-
+		echo "looping \n  ";
 		foreach ($toApply as $migration) {
 			if($migration == '.' || $migration =='..' || $migration =='...'){
 				continue;
 			}
+			echo "scaning 1\n  ";
 			require_once $value.'/Migrations/'.$migration;
+			echo "scaning 2\n  ";
 			$className = pathinfo($migration,PATHINFO_FILENAME);
+			echo "scaning 3\n  ";
 			$instance = new $className();
+			echo "scaning 4\n  ";
 			echo 'apping migration '.$migration.PHP_EOL;
 			$instance->up();
 			echo $migration.' applied'.PHP_EOL;
 			$this->newMigrations[]= $migration;
 
 		}
+		echo "endloop \n  ";
 		if(!empty($newMigrations)){
 			$this->saveMigrations();
 
@@ -145,7 +152,7 @@ class Database extends PDO
 			echo "All migrations have been Applied";
 		}
 	}
-	public function createMigrationTable($value='')
+	public function createMigrationTable()
 	{
 		$this->exec("
 			CREATE TABLE IF NOT EXISTS migrations(

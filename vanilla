@@ -9,7 +9,7 @@ require __DIR__ . '/Core/cli/autoload.php';
 
 $app = new App();
 
-$app->setSignature("minicli hello name [ user=name ]");
+$app->setSignature("vanilla hello name [ user=name ]");
 
 $app->registerCommand("help", function(CommandCall $call) use ($app) {
     $app->printSignature();

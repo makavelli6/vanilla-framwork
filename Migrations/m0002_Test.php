@@ -1,5 +1,5 @@
 <?php 
-require __DIR__.'/../server.php';
+require_once __DIR__.'/../server.php';
 require_once ROOT.'/Core/libs/BaseMigration.php';
 
 /**

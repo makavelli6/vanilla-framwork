@@ -8,6 +8,9 @@ abstract class CommandController
 
     /** @var  CommandCall */
     protected $input;
+    protected $root_core = __DIR__.'/../../';
+    protected $root_app = __DIR__.'/../../../';
+
 
     /**
      * Command Logic.

@@ -1,7 +1,7 @@
 <?php 
 
 require_once 'path.php';
-require_once $_SERVER['DOCUMENT_ROOT'].'/Core/libs/Helper.php';
+require_once __DIR__.'/../../Core/libs/Helper.php';
 
 //PATHS
 //DO NT fORGET BACKSLASH (/) after path

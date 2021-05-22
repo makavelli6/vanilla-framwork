@@ -15,7 +15,7 @@ class App
     public function __construct()
     {
         $this->printer = new CliPrinter();
-        $this->command_registry = new CommandRegistry(__DIR__ . '/../App/Command');
+        $this->command_registry = new CommandRegistry(__DIR__ . '/../App/Command/');
     }
 
     /**

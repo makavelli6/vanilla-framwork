@@ -8,6 +8,9 @@ class Controller
 		//echo 'MAIN contraller <br>';
 		$this->view = new View();
 		$this->template = new Template();
+		$this->template->cache_enabled = false;
+		$this->template->cache_path = ROOT.'/Store/Cache/Pages/';
+		$this->template->file_ext = '.html';
 		
 	}
 	public function loadModel($name, $modelPath){
