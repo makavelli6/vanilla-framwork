@@ -11,9 +11,9 @@ class RunController extends CommandController
         require_once $this->root_core.'Libs/Migration.php';
 
         $config = LoadConfig($this->root_app.'/App/config/db.conf');
-        $db = new Migration($config['DB_TYPE'],$config['DB_HOST'],$config['DB_NAME'],$config['DB_USER'],$config['DB_PASS']);
+        $db = new Migration(DB_TYPE,DB_HOST,DB_NAME,DB_USER,DB_PASS);
         $db->applyMigration($this->root_app);
-        $this->getPrinter()->display_success("---Migration Run Succesfully---");
+        $this->getPrinter()->display_success("-->Migration Run Succesfully");
         
     }
 }

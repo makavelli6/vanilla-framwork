@@ -9,8 +9,7 @@ class RefreshController extends CommandController
         require_once $this->root_core.'Libs/Migration.php';
 
         $db = new Migration(DB_TYPE,DB_HOST,DB_NAME,DB_USER,DB_PASS);
-        $db->applyMigration($this->root_app);
-        $this->getPrinter()->display_success("---Migration Run Succesfully---");
-        
+        $db->refreshMigration($this->root_app);
+        $this->getPrinter()->display_success("-->Migration Refreshed Succesfully");        
     }
 }

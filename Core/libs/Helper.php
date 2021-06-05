@@ -29,7 +29,7 @@ class Helper
 		Json::encode_file($file.'.conf', $data);
 		if(file_exists($file.'.conf')){
 			$name = explode('/', $file);
-			echo $name[count($name) - 1]."config file created successfully";
+			echo $name[count($name) - 1].".config file created successfully \n";
 		}
 	}
 }

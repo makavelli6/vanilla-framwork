@@ -7,7 +7,6 @@ function create_new_mig($base,$name){
     $size = count(scandir($base.'/Migrations'))-2;
 
     if($size < 10 ){
-        //
         $size =$size + 1;
         $fileName = 'm000'.$size.'_'.$name;
     }else if($size > 10 && $size < 100 ){
