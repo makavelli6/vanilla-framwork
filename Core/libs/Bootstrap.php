@@ -7,6 +7,7 @@ class Bootstrap
 	private $_controller =null;
 
 	private $_controllerPath = ROOT.CONTROLLER;
+	private $_managerPath = ROOT.'/Core/managers/';
 	private $_errorFile = 'errors.php';
 	private $_defaultFile = 'index.php';
 
@@ -81,6 +82,10 @@ class Bootstrap
 			require  $file;
 			$this->_controller =  new $this->_url[0];
 			$this->_controller->loadModel($this->_url[0], $this->_modelPath);
+		}elseif(file_exists(ROOT.'/Core/system/controllers/'.$this->_url[0].'php')){
+			require  ROOT.'/Core/system/controllers/'.$this->_url[0].'php';
+			$this->_controller =  new $this->_url[0];
+			$this->_controller->loadModel($this->_url[0], ROOT.'/Core/system/models/');
 
 		}else{
 			$this->_error();
@@ -122,6 +127,9 @@ class Bootstrap
 		} 
 
 
+
+	}
+	private function _loadManager(){
 
 	}
 

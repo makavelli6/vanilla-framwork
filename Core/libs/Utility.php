@@ -19,7 +19,6 @@ class Utility {
     public static function client_redirect($location = null){
         if($location){
             
-            //$(location).attr('href', $location);
             echo '<script>$(location)'.".attr('href','$location');</script>";
             exit();
         }

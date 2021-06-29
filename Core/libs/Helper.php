@@ -32,6 +32,12 @@ class Helper
 			echo $name[count($name) - 1].".config file created successfully \n";
 		}
 	}
+	public static function isWin (){
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            return true;
+        }
+        return false;
+    }
 }
 
 
