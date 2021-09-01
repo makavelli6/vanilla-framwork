@@ -38,9 +38,7 @@ class JWT{
 
     }
 
-    public static function validateToken( $jwt)
-    {
-        // split the token
+    public static function validateToken( $jwt){
         $tokenParts = explode('.', $jwt);
         $header = base64_decode($tokenParts[0]);
         $payload = base64_decode($tokenParts[1]);
@@ -60,14 +58,15 @@ class JWT{
         $signatureValid = ($base64UrlSignature === $signatureProvided);
 
         if ($tokenExpired) {
-            echo json_encode(['result'=>'error', 'msg' =>'Token has expired.']);
-            return;
+            $result = ['result'=>'error', 'msg' =>'Token has expired.'];
+            return $result;
         }
         if ($signatureValid) {
-            echo json_encode(['result'=>'success', 'msg' =>'Token is valid.']);
+            $result = ['result'=>'success', 'msg' =>'Token is valid.'];
         } else {
-            echo json_encode(['result'=>'error', 'msg' =>'Token is invalid.']);
+            $result = ['result'=>'error', 'msg' =>'Token is invalid.'];
         }
+        return $result;
     }
 }
 

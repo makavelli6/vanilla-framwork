@@ -1,18 +1,15 @@
 <?php
 
-
-
-class CreateController extends CommandController
-{
+class MigrationController extends CommandController{
     public function __construct() {
-        $this->type = 'migration';
+        $this->type = 'new';
     }
     public function handle()
     {
         CliAuth::Validate();
         $name = $this->hasParam('name') ? $this->getParam('name') :  CliUtil::RegularInput('Enter Migration Name: ');
         CliExeption::TextIsEmpty($name ,"\033[31m ->Error Found : Migration Name was not set 
-        \n\033[36m -> Run the cmd below insted... \n\033[0m vanilla migration create name=yourMigrationName ".'(!_!)'.PHP_EOL);
+        \n\033[36m -> Run the cmd below insted... \n\033[0m vanilla new migration name=yourMigrationName ".'(!_!)'.PHP_EOL);
 
         require_once $this->root_core.'Libs/File.php';
         $fileName = '';
@@ -29,10 +26,12 @@ class CreateController extends CommandController
             $fileName = 'm0'.$size.'_'.$name; 
         }
         File::copy_file($this->root_core.'cli/App/Temp/migration_temp_alter.php',$this->root_app.'Migrations/',$fileName.'.php');
-        File::replace_string_in_file($this->root_app.'Migrations/'.$fileName.'.php','tempName',$fileName);
+        File::replace_string_in_file($this->root_app.'/Migrations/'.$fileName.'.php','tempName',strtolower($name));
         $this->getPrinter()->display_success("->Success:\n ".$name." Migration was created Successfully");
         
     }
+
+  
 
     
 }

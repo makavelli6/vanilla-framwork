@@ -2,8 +2,11 @@
 
 
 
-class ServerController extends CommandController
-{
+class ServerController extends CommandController{
+
+    public function __construct() {
+        $this->type = 'init';
+    }
     public function handle()
     {
         $this->getPrinter()->display_info("Clearing Migration ... \n Please Wait");

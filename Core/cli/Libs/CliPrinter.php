@@ -22,14 +22,14 @@ class CliPrinter
     public function display_info( $msg )
     {
         $this->newline();
-        echo "\033[36m $msg \033[0m\n";
+        echo "\033[36m $msg \033[0m";
         $this->newline();
     }
 
     public function display_error( $msg )
     {
         $this->newline();
-        echo "\033[31m $msg \033[0m\n";
+        echo "\033[31m $msg \033[0m";
         $this->newline();
     }
 
@@ -43,8 +43,11 @@ class CliPrinter
     public function display_warning( $msg )
     {
         $this->newline();
-        echo "\033[33m$msg \033[0m\n";
+        echo "\033[33m$msg \033[0m";
         $this->newline();
+    }
+    public function display_rw($msg){
+        echo ("$msg \r");
     }
 
 

@@ -1,10 +1,13 @@
 <?php 
 
+$error = new Error_Redirect();
 /**
  * 
  */
-trait Error_Redirect{
-	private  $errors = array(
+class HttpUtil
+{
+	
+	private static $errors = array(
 		'400' =>'400 Bad Request',
 		'401' =>'401 Unauthorized',
 		'402' =>'402 Payment Required',
@@ -48,17 +51,40 @@ trait Error_Redirect{
 		'510' =>'510 Not Extended',
 		'511' =>'511 Network Authentication Required',
 		'599' =>'599 Network Connect Timeout Error'
-		);
+	);
 
-	public function _error($code,$msg){
+	public static function handle($code,$msg){
 		$error_code = ''.$code;
-		header('HTTP/1.0  ' . $code . ' ' . $this->errors[$code]);
-
+		header('HTTP/1.0  ' . $error_code . ' ' . self::$errors[$error_code]);
+		echo json_encode(['result'=>'error', 'msg' =>msg]);
 		exit();       
 
-    }
+	}
+	public static function ValidateToken(){
+		$headers = get_headers();
+		$token = $headers['Bearer'];
+		$result = JWT::validateToken($token);
+		if($result['result'] == 'succes'){
+			return true;
+		}
+		self::handle(401,$result['msg']);
+		die();
+	}
+	public static function ValidateClient(){
+
+	}
+    public static function setHeader($header = array()){
+		$headers = $header;
+	}
+	public static function responce($data){
+		header('HTTP/1.0  ' . 200 . ' ' . self::$errors[$code]);
+		echo json_encode($data);
+		# code...
+	}
+	
 
 }
+
 
 
 

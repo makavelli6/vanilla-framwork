@@ -4,6 +4,9 @@
 
 class ClearController extends CommandController
 {
+    public function __construct() {
+        $this->type = 'migration';
+    }
     public function handle()
     {
         $this->getPrinter()->display_info("Clearing Migration ... \n Please Wait");

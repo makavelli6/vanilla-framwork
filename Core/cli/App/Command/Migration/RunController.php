@@ -4,6 +4,9 @@
 
 class RunController extends CommandController
 {
+    public function __construct() {
+        $this->type = 'migration';
+    }
     public function handle()
     {
         $this->getPrinter()->display_info("Running Migration ... \n Please Wait");

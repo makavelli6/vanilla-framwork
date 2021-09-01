@@ -10,6 +10,8 @@ abstract class CommandController
     protected $input;
     protected $root_core = __DIR__.'/../../';
     protected $root_app = __DIR__.'/../../../';
+    public $type = '';
+    
 
 
     /**

@@ -26,7 +26,6 @@ class Bootstrap
 		//load the default contraller if no url is set
 		if(empty($this->_url[0])){
 			$this->_loadDefaultCOntraller();
-
 			return false;
 		}
 

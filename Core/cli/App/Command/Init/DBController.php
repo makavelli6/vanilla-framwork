@@ -2,8 +2,11 @@
 
 
 
-class DBController extends CommandController
-{
+class DBController extends CommandController{
+
+    public function __construct() {
+        $this->type = 'init';
+    }
     public function handle()
     {
 
@@ -11,37 +14,26 @@ class DBController extends CommandController
         require_once $this->root_app.'App/config/app.php';
         $config = LoadConfig($this->root_app.'/App/config/db.conf');
         $db = array("DB_TYPE"=>DB_TYPE, "DB_HOST"=>DB_HOST, 'DB_NAME'=>DB_NAME, 'DB_USER'=>DB_USER,'DB_PASS'=>DB_PASS);
-        print_r($db);
 
-        echo PHP_EOL.'Enter DataBase Type ('.DB_TYPE.'): ';
-        $data = trim(fgets(STDIN, 1024));
-        if($data != '' || $data != null){
-           $db['DB_TYPE'] = $data;
-        }
+        $dbtype = $this->hasParam('type') ? $this->getParam('type') :  CliUtil::RegularInput('Enter DataBase Type ('.DB_TYPE.'): ');
+        if($dbtype != '' || $dbtype != null){ $db['DB_TYPE'] = $dbtype; }
         echo PHP_EOL.'DataBase Type is "'.$db['DB_TYPE'].'"'.PHP_EOL;
 
-        echo PHP_EOL.'Enter DataBase Host ('.DB_HOST.'): ';
-        $data = trim(fgets(STDIN, 1024));
-        if( $data != '' || $data != null){
-           $db['DB_HOST'] = $data;
-        }
+        $dbhost = $this->hasParam('host') ? $this->getParam('host') :  CliUtil::RegularInput('Enter DataBase Host ('.DB_HOST.'): ');
+        if( $dbhost != '' || $dbhost != null){ $db['DB_HOST'] = $dbhost; }
         echo PHP_EOL.'DataBase User is "'.$db['DB_HOST'].'"'.PHP_EOL;
 
-        echo PHP_EOL.'Enter DataBase Name ('.DB_NAME.'): ';
-        if($data != '' || $data != null){
-            $db['DB_NAME'] = $data;
-         }
+        $dbname = $this->hasParam('name') ? $this->getParam('name') :  CliUtil::RegularInput('Enter DataBase Name ('.DB_NAME.'): ');
+        if($dbname != '' || $dbname != null){ $db['DB_NAME'] = $dbname; }
         echo PHP_EOL.'DataBase Type is "'.$db['DB_NAME'].'"'.PHP_EOL;
 
-        echo PHP_EOL.'Enter DataBase User ('.DB_USER.'): ';
-        $data = trim(fgets(STDIN, 1024));
-        if($data != '' || $data != null){
-           $db['DB_USER'] = $data;
-        }
+        $dbuser = $this->hasParam('user') ? $this->getParam('user') :  CliUtil::RegularInput('Enter DataBase User ('.DB_USER.'): ');
+        if($dbuser != '' || $dbuser != null){ $db['DB_USER'] = $data; }
         echo PHP_EOL.'DataBase User is "'.$db['DB_USER'].'"'.PHP_EOL;
 
-        echo PHP_EOL.'Enter DataBase Password (): ';
-        $db['DB_PASS'] = trim(fgets(STDIN, 1024));
+        $dbpass = $this->hasParam('password') ? $this->getParam('password') :  CliUtil::RegularInput('Enter DataBase Password (): ');
+        //CliExeption::TextIsEmpty($dbpass,"\033[33m Password is Empty | \033[0m".'(!_!)'.PHP_EOL);
+        $db['DB_PASS'] = $dbpass;
         echo PHP_EOL.'DataBase Password is "'.$db['DB_PASS'].'"'.PHP_EOL;
 
         require_once $this->root_core.'Libs/Helper.php';

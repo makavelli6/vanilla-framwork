@@ -3,6 +3,20 @@
  * 
  */
 class Utility {
+    const OS_UNKNOWN = 1;
+    const OS_WIN = 2;
+    const OS_LINUX = 3;
+    const OS_OSX = 4;
+
+    public static function GetOS(){
+        switch(true){
+            case stristr(PHP_OS, 'DAR'): return self::OS_OSX;
+            case stristr(PHP_OS, 'WIN'): return self::OS_WIN;
+            case stristr(PHP_OS, 'LINUX'): return self::OS_LINUX;
+            default : return self::OS_UNKNOWN;
+        }
+    }
+
 
     public static function redirect($location = null){
         if($location){
@@ -91,12 +105,7 @@ class Utility {
         return $output;
         }
 
-    public static function xss_filter($value)
-    {
-       $antiXss = new AntiXSS();
-       return $antiXss->xss_clean($value);
-
-    }
+   
 
 }
     

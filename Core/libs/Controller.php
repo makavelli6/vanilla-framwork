@@ -8,6 +8,9 @@ class Controller
 		//echo 'MAIN contraller <br>';
 		$this->view = new View();
 		$this->template = new Template();
+		
+
+		
 		$this->template->cache_enabled = false;
 		$this->template->cache_path = ROOT.'/Store/Cache/Pages/';
 		$this->template->file_ext = '.html';
@@ -23,6 +26,54 @@ class Controller
 			$this->model = new $modelName();
 		}
 	}
+
+	protected function FetchGet( $filters)
+    {
+        $data  = array( );
+        foreach ($filters as $filter) {
+            if(key_exists($filter ,$_GET)){
+                //add a methord to sanitise the input
+                $data[$filter] = $this->filter($_GET[$filter]);
+            }
+        }
+        return $data;
+    }
+
+    protected function FetchAllGet()
+    {
+        $data  = array( );
+        foreach ($_GET as $key => $value) {
+            $data[$key] = $this->filter($value);
+       }
+       return $data;
+    }
+
+	protected function filter($str)
+	{
+		return $str;
+	}
+
+	protected function FetchPost( $filters)
+    {
+        $data  = array( );
+        foreach ($filters as $filter) {
+            if(key_exists($filter ,$_POST)){
+                //add a methord to sanitise the input
+                $data[$filter] = $this->filter($_POST[$filter]);
+            }
+        }
+        return $data;
+    }
+
+    protected function FetchAllPost( $filter)
+    {
+        $data  = array( );
+        foreach ($_POST as $key => $value) {
+            $data[$key] = $this->filter($value);
+       }
+       return $data;
+    }
+
 }
 
  ?>

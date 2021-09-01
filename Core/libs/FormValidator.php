@@ -1,41 +1,6 @@
 <?php 
 
 
-/**
- *  Pork.FormValidator
- *  Validates arrays or properties by setting up simple arrays. 
- *  Note that some of the regexes are for dutch input!
- *  Example:
- * 
- *  $validations = array('name' => 'anything','email' => 'email','alias' => 'anything','pwd'=>'anything','gsm' => 'phone','birthdate' => 'date');
- *  $required = array('name', 'email', 'alias', 'pwd');
- *  $sanitize = array('alias');
- *
- *  $validator = new FormValidator($validations, $required, $sanitize);
- *                  
- *  if($validator->validate($_POST))
- *  {
- *      $_POST = $validator->sanitize($_POST);
- *      // now do your saving, $_POST has been sanitized.
- *      die($validator->getScript()."<script type='text/javascript'>alert('saved changes');</script>");
- *  }
- *  else
- *  {
- *      die($validator->getScript());
- *  }   
- *  
- * To validate just one element:
- * $validated = new FormValidator()->validate('blah@bla.', 'email');
- * 
- * To sanitize just one element:
- * $sanitized = new FormValidator()->sanitize('<b>blah</b>', 'string');
- * 
- * @package pork
- * @author SchizoDuckie
- * @copyright SchizoDuckie 2008
- * @version 1.0
- * @access public
- */
 class FormValidator
 {
     public static $regexes = Array(
