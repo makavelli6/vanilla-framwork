@@ -3,11 +3,7 @@ A simle MVC framework implimentation using php , no additonal 3rd party are used
 
 
 ### Email Support 
-- Configuration for email suport  is easy 
-
-
-
-<details><summary>Configuration</summary>
+<details><summary>Configuration for email suport  is easy </summary>
 <p>Navigate  to App > Config > app.php</p>
 
 ```php
@@ -18,20 +14,23 @@ A simle MVC framework implimentation using php , no additonal 3rd party are used
     define('Port_', 100);
 ```
 
-<p>Navigate  to App > Config > app.php</p>
+<p>Within your controllers methord  use any of the ezamples</p>
 
 ```php
-   function index(){
-		$this->mail->sendEmail(
-            'test_user@gmail.com', //message recipient
-            'subject', // subject
-            'message to be sent' // actual email
-            );
-        $this->mail->sendEmailHTML(
-            'test_user@gmail.com', //message recipient
-            'subject', // subject
-            '<h1>Test</h1>' // actual email
-            );
+//example 1
+    $this->mail->sendEmail(
+        'test_user@gmail.com', //message recipient
+        'subject', // subject
+        'message to be sent' // actual email
+        );
+//example 2
+    $this->mail->sendEmailHTML(
+        'test_user@gmail.com', //message recipient
+        'subject', // subject
+        '<h1>Test</h1>' // actual email
+    );
+//example 3
+
         $this->mail->sendEmailWithAttachment(
             'test_user@gmail.com', //message recipient
             'subject', // subject
@@ -40,7 +39,6 @@ A simle MVC framework implimentation using php , no additonal 3rd party are used
             [ 'var/files/test.docs', 'var/files/atachment.docs']
             );
         //
-	}
 ```
 
 </p>
