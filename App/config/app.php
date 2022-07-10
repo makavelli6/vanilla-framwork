@@ -32,6 +32,15 @@ define('DB_PASS',$db['DB_PASS']);
 
 
 
+define('Host_', '');
+define('SMTP_Auth_', true);
+define('User_Name_', '');
+define('Password_', '');
+define('Port_', 100);
+
+
+
+
 //if local host use
 //define('SITE','http://localhost/simpleMVC/');
 //define('URL','http://localhost/simpleMVC/'); 

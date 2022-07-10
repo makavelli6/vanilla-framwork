@@ -8,6 +8,12 @@ class Controller
 		//echo 'MAIN contraller <br>';
 		$this->view = new View();
 		$this->template = new Template();
+
+        if(Host_ != '' && User_Name_ != '' && Password_ != '' && Port_ ){
+            $this->mail = new Mailer(Host_, SMTP_Auth_, User_Name_, Password_, Port_);
+        }
+
+        
 		
 
 		
