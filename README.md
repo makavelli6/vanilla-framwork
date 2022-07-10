@@ -30,15 +30,14 @@ A simle MVC framework implimentation using php , no additonal 3rd party are used
         '<h1>Test</h1>' // actual email
     );
 //example 3
+    $this->mail->sendEmailWithAttachment(
+        'test_user@gmail.com', //message recipient
+        'subject', // subject
+        false,//has html content or true
+        'Test', // email body or <h1>Test</h1>
+        [ 'var/files/test.docs', 'var/files/atachment.docs'] , //array of  files
+    );
 
-        $this->mail->sendEmailWithAttachment(
-            'test_user@gmail.com', //message recipient
-            'subject', // subject
-            false,//has html content or true
-            '<h1>Test</h1>', // email body or <h1>Test</h1>
-            [ 'var/files/test.docs', 'var/files/atachment.docs']
-            );
-        //
 ```
 
 </p>
