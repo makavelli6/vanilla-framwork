@@ -2,6 +2,10 @@
 
 require_once 'path.php';
 require_once __DIR__.'/../../Core/libs/Helper.php';
+require_once __DIR__.'/../../Core/libs/JSON.php';
+require_once __DIR__.'/../../Core/libs/Text.php';
+
+
 
 //PATHS
 //DO NT fORGET BACKSLASH (/) after path

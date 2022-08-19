@@ -27,7 +27,7 @@ class Mailer
         $this->Port = $port;
 	}
 
-    public static function sendEmail($to, $subject, $text)
+    public  function sendEmail($to, $subject, $text)
     {
         $mail = new PHPMailer(true);
 
@@ -58,7 +58,7 @@ class Mailer
         }
     }
 
-    public static function sendEmailHTML($to, $subject, $html)
+    public  function sendEmailHTML($to, $subject, $html)
     {
         $mail = new PHPMailer(true);
         
@@ -91,7 +91,7 @@ class Mailer
         }
     }
 
-    public static function sendEmailWithAttachment($to, $subject, $body,$hasHTML =false,Array $attachments = [])
+    public  function sendEmailWithAttachment($to, $subject, $body,$hasHTML =false,Array $attachments = [])
     {
         $mail = new PHPMailer(true);
                 

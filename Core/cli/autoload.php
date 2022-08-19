@@ -9,29 +9,30 @@ function api_auto_load($temp){
 
 	$fullpath  = __DIR__.'/App/Command/'.$className.".php";
 
+
 	
-	if(!file_exists($fullpath)){
+	if(!file_exists($fullpath !== null ?  $fullpath:'')){
 		$fullpath = check_in_dir($className, __DIR__.'/App/Command/');
 	}
 
-	if(!file_exists($fullpath)){
+	if(!file_exists($fullpath !== null ?  $fullpath:'')){
 		$fullpath = __DIR__.'/Libs/'.$className.'.php';
 	}
 
 
-	if(!file_exists($fullpath)){
+	if(!file_exists($fullpath !== null ?  $fullpath:'')){
 		$fullpath = __DIR__.'/Util'.$className.'.php';
 	}
 
-	if(!file_exists($fullpath)){
+	if(!file_exists($fullpath !== null ?  $fullpath:'')){
 		$fullpath = __DIR__.'/../Libs/'.$className.'.php';
 	}
 	
 	
-	if(!file_exists($fullpath)){
+	if(!file_exists($fullpath !== null ?  $fullpath:'')){
 		$fullpath = __DIR__.'/Temp/'.$className.'.php';
 	}
-	if(!file_exists($fullpath)){
+	if(!file_exists($fullpath !== null ?  $fullpath:'')){
 		return false;
 	}
 	require_once $fullpath;

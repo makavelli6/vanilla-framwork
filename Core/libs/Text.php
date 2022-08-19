@@ -1,10 +1,8 @@
 <?php
-require_once __DIR__.'/File.php';
 /**
  * 
  */
-class Text extends File
-{
+class Text  {
 	
 	public  function write_file($file,$txt = '')
 	{
@@ -59,12 +57,13 @@ class Text extends File
 	{
 		// r+	Open a file for read/write. 
 		// File pointer starts at the beginning of the file
+		$data ='';
 		fopen($file, "r");
 		while(!feof($file)) {
 			$data = fgets($file);
 		}
 		fclose($file);
-		return $content;
+		return $data;
 	}
 
 

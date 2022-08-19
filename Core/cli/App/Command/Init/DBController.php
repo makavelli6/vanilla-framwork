@@ -36,7 +36,6 @@ class DBController extends CommandController{
         $db['DB_PASS'] = $dbpass;
         echo PHP_EOL.'DataBase Password is "'.$db['DB_PASS'].'"'.PHP_EOL;
 
-        require_once $this->root_core.'Libs/Helper.php';
         Helper::SetConfig($this->root_app.'App/config/db', $db);
         
         $this->getPrinter()->display_success("-->DataBase Configured Succesfully");

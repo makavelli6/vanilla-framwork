@@ -22,4 +22,13 @@ class CliExeption{
         die("$msg");
         throw new Exception();
     }
+
+    public  static function TextisInt( $var, $msg){
+        if(!(is_int($var) && is_numeric($var))){
+            die("$msg");
+            throw new Exception();
+
+        }
+        
+    }
 }

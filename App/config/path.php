@@ -12,6 +12,8 @@ define('UTIL', '/App/util/');
 
 define('SYSTEM', '/Core/system/');
 define('INIT', '/Core/system/init.php');
+define('INIT_SYS', '/Core/system/sys.php');
+
 define('FUNC', '/Core/system/func.php');
 
 define('MODEL', '/App/models/');

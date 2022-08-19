@@ -60,10 +60,13 @@ class Bootstrap
 
 	private function _getURL(){
 		$url =isset($_GET['url'])? $_GET['url']: null;
+		
 		$url = rtrim($url, '/');
+		echo($url.'<br>');
 		$url =filter_var($url, FILTER_SANITIZE_URL);
 		//removes exess back slash
 		$this->_url = explode('/', $url);
+		print_r($this->_url );
 	}
 
 	//loads  if the isno  URL passes
