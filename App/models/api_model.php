@@ -33,7 +33,6 @@ class Api_Model extends Model
 		$postData =array(
 		'genre_name'=>$data['genre_name']
 	);
-
 		$this->db->update('genre',$postData,"`genre_id`={$data['genre_id']}");
 	}
 	/*

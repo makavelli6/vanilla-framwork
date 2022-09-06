@@ -29,7 +29,7 @@ class Database extends PDO
 				$sth->execute();
 				return $sth->fetchAll($fetchMode);
 	}
-	public function select_fetch_1($sql, $array = array(),$fetchMode =PDO::FETCH_ASSOC){
+	public function select_one($sql, $array = array(),$fetchMode =PDO::FETCH_ASSOC){
 		$sth = $this->prepare($sql);
 		foreach ($array as $key => $value) {
 			$sth->bindValue("$key","$value");
@@ -41,7 +41,7 @@ class Database extends PDO
 
 	/**
 	*insert{
-	*@param type $table -name  oftabe to insert into
+	*@param type $table name of tabe to insert into
 	*@param type $data An associate array
 	}
 	*/
