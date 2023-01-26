@@ -1,44 +1,75 @@
 # Vanilla-framwork
-A simle MVC framework implimentation using php , no additonal 3rd party are used (Vanilla Php);
+Vanila architecture bares striking resemblance to Codeigniter. However, being a lightweight, it does not include a lot of the functionality that comes with Codeigniter.
 
+ 
+## Quick Start
+ Requiresments:
 
-### Email Support 
-<details><summary>Configuration for email suport  is easy </summary>
-<p>Navigate  to App > Config > app.php</p>
+<p>Needs the following to run:</p>
+<ul>
+<li>PHP 7.2 and up</li>
+<li>Composer</li>
+<li>Database: MySQL</li>
+<li>Web Server: Apache (Mod Rewrite, Override)</li>
+</ul>
 
-```php
-   define('Host_', ''); 
-    define('SMTP_Auth_', true);
-    define('User_Name_', '');
-    define('Password_', '');
-    define('Port_', 100);
-```
+### Installing Vanilla-Fremwork
 
-<p>Within your controllers methord  use any of the ezamples</p>
+<p>can be installed by:</p>
 
-```php
-//example 1
-    $this->mail->sendEmail(
-        'test_user@gmail.com', //message recipient
-        'subject', // subject
-        'message to be sent' // actual email
-        );
-//example 2
-    $this->mail->sendEmailHTML(
-        'test_user@gmail.com', //message recipient
-        'subject', // subject
-        '<h1>Test</h1>' // actual email
-    );
-//example 3
-    $this->mail->sendEmailWithAttachment(
-        'test_user@gmail.com', //message recipient
-        'subject', // subject
-        false,//has html content or true
-        'Test', // email body or <h1>Test</h1>
-        [ 'var/files/test.docs', 'var/files/atachment.docs'] , //array of  files
-    );
+<!-- ```bash
+$ composer create-project adigah/asmvc project-folder-name -s beta
 
 ```
+<p>Or</p> -->
 
-</p>
-</details>
+```console
+$ git clone https://github.com/makavelli6/vanilla-framwork.git
+
+```
+Change to the repository directory
+
+```console
+$ cd vanilla-framwork
+```
+Run composer to install any PHP dependencies
+
+```console
+$ composer install
+```
+
+
+Displaying Hello World
+
+Goto index.php located in below:
+
+```
+└── App
+    └── controllers
+        ├── index.php
+```
+Add  or midify the following methord:
+
+```php
+function hello(){
+	echo "Hello World ";
+}
+
+```
+
+Now serve the app by running:
+
+```shell
+$ php vanilla init server
+
+```
+You should be greeted by display like this while you're accessing **localhost:8000/index/hello**  url:
+
+### URL Structure
+
+By default, URLs in Vanilla are designed to be search-engine and human friendly.The routing in the system is dirrectly dependent of the controllers, Vanilla uses a segment-based approach:
+
+**example.com/class/function/param** By default index.php is hidden in the URL. This is done using the .htaccess file in the root directory.
+
+
+

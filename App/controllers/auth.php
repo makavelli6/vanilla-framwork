@@ -3,7 +3,6 @@
  class Auth extends Controller
  {
  	private $form_css =  array('form.css');
-	//private $routes = array();
 
 
 
@@ -22,7 +21,7 @@
  		Verify::authLogin('location:'.URL.'index');
  		$this->view->title = 'Login';
  		$this->view->js =array('custom/signin.js', 'Routes/user-route.js');
- 		$this->view->render_no_player('forms/signin');
+ 		$this->view->render('forms/signin');
  	}
  	public function SignUp()
  	{
