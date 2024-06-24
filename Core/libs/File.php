@@ -10,7 +10,7 @@ class File
 	{
 		
 	}
-	public  static function copy_file($file,$destination='',$file2 =''){
+	public  static function copy_file($file,?string $destination='',?string $file2 =''){
 		copy($file, $destination.$file2);
 
 	}
