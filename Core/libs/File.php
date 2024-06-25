@@ -14,7 +14,7 @@ class File
 		copy($file, $destination.$file2);
 
 	}
-	public  static  function make_dir($destination='',$dir='')
+	public  static  function make_dir($destination='',?string $dir='')
 	{
 		mkdir($destination.$dir);
 	}
@@ -31,7 +31,7 @@ class File
 	{
 		unlink($file);
 	}
-	public  static function rename_dir($destination='',$oldname='',$newname='')
+	public  static function rename_dir($destination='',?string $oldname='',?string $newname='')
 	{
 		rename($destination.$oldname, $destination.$newname);
 	}
