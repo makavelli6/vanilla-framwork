@@ -59,14 +59,15 @@ class Bootstrap
 	}
 
 	private function _getURL(){
-		$url =isset($_GET['url'])? $_GET['url']: null;
+		$url = isset($_GET['url']) ? $_GET['url'] : (isset($_SERVER["REQUEST_URI"]) ? parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH) : null);
 		
-		$url = rtrim($url, '/');
-		echo($url.'<br>');
-		$url =filter_var($url, FILTER_SANITIZE_URL);
-		//removes exess back slash
+		$url = trim($url, '/');
+		// echo($url.'<br>'); // Debug output
+		$url = filter_var($url, FILTER_SANITIZE_URL);
+		
+		//removes excess back slash
 		$this->_url = explode('/', $url);
-		print_r($this->_url );
+		// print_r($this->_url); // Debug output
 	}
 
 	//loads  if the isno  URL passes

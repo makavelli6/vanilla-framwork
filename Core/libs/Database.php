@@ -81,75 +81,118 @@ class Database extends PDO
 	*@param type $data An associate array
 	}
 	*/
-	public function update($table,$data,$where){
-
+	public function update($table, $data, $whereConditions){
 		ksort($data);
-		//print_r($data);
-
 		$fieldDetails = null;
 
 		foreach ($data as $key => $value) {
 			$fieldDetails .= "`$key` = :$key," ;
-			}
-			$fieldDetails = rtrim($fieldDetails, ',');
-		//UPDATE table  SET data1= a, data2=b , data3= c WHERE something(id)=1
-		$sth = $this->prepare("UPDATE `$table` SET $fieldDetails WHERE $where ");
+		}
+		$fieldDetails = rtrim($fieldDetails, ',');
+
+        $whereClause = "";
+        if (is_array($whereConditions) && !empty($whereConditions)) {
+            $whereClause = "WHERE ";
+            $conditions = [];
+            foreach ($whereConditions as $key => $value) {
+                $conditions[] = "`$key` = :w_$key";
+            }
+            $whereClause .= implode(" AND ", $conditions);
+        } else if (is_string($whereConditions) && !empty($whereConditions)) {
+            $whereClause = "WHERE " . $whereConditions;
+        }
+
+		$sth = $this->prepare("UPDATE `$table` SET $fieldDetails $whereClause");
 
 		foreach ($data as $key => $value) {
-			$sth->bindValue("$key","$value");
-				}
+			$sth->bindValue(":$key", $value);
+		}
+        
+        if (is_array($whereConditions)) {
+            foreach ($whereConditions as $key => $value) {
+                $sth->bindValue(":w_$key", $value);
+            }
+        }
+        
 		$sth->execute();
-		//die();
 	}
 
 /**
 *DELETE
 *@param type string $table
-*@param type string $where
+*@param type array|string $whereConditions
 *@param type  int $limit
-*@return int affected rows
-
+*@return bool success
 */
-	public  function  delete($table,$where, $limit =1){
-		return $this->exec("DELETE FROM `$table`  WHERE $where LIMIT $limit ");
-		//print_r($where);
-		
+	public function delete($table, $whereConditions, $limit = 1){
+        $whereClause = "";
+        if (is_array($whereConditions) && !empty($whereConditions)) {
+            $whereClause = "WHERE ";
+            $conditions = [];
+            foreach ($whereConditions as $key => $value) {
+                $conditions[] = "`$key` = :w_$key";
+            }
+            $whereClause .= implode(" AND ", $conditions);
+        } else if (is_string($whereConditions) && !empty($whereConditions)) {
+            $whereClause = "WHERE " . $whereConditions;
+        }
 
+        $sth = $this->prepare("DELETE FROM `$table` $whereClause LIMIT $limit");
+        
+        if (is_array($whereConditions)) {
+            foreach ($whereConditions as $key => $value) {
+                $sth->bindValue(":w_$key", $value);
+            }
+        }
+        
+		return $sth->execute();
 	}
 	public function applyMigration($value)
 	{
-		echo "creating  ";
+        if (php_sapi_name() !== 'cli') {
+            throw new Exception("Migrations can only be run from the Command Line Interface.");
+        }
+
+		echo "Creating migration table... \n";
 		$this->createMigrationTable();
-		echo "getting  ";
+		
+        echo "Fetching applied migrations... \n";
 		$appliedMig = $this->getAppliedMigrations();
 
-		echo "scaning \n  ";
-		$files = scandir($value.'/Migrations');
+		echo "Scanning for new migrations in: $value/Migrations \n";
+        $migrationDir = $value.'/Migrations';
+        
+        if (!is_dir($migrationDir)) {
+            throw new Exception("Migration directory does not exist: $migrationDir");
+        }
+
+		$files = scandir($migrationDir);
 		$toApply = array_diff($files, $appliedMig);
-		echo "looping \n  ";
+		
 		foreach ($toApply as $migration) {
-			if($migration == '.' || $migration =='..' || $migration =='...'){
+			if(in_array($migration, ['.', '..', '...']) || pathinfo($migration, PATHINFO_EXTENSION) !== 'php'){
 				continue;
 			}
-			echo "scaning 1\n  ";
-			require_once $value.'/Migrations/'.$migration;
-			echo "scaning 2\n  ";
+			
+			require_once $migrationDir.'/'.$migration;
 			$className = pathinfo($migration,PATHINFO_FILENAME);
-			echo "scaning 3\n  ";
+            
+            if (!class_exists($className)) {
+                throw new Exception("Migration class $className not found in $migration");
+            }
+
 			$instance = new $className();
-			echo "scaning 4\n  ";
-			echo 'apping migration '.$migration.PHP_EOL;
+			echo "Applying migration: $migration \n";
 			$instance->up();
-			echo $migration.' applied'.PHP_EOL;
+			echo " -> $migration applied successfully.\n";
 			$this->newMigrations[]= $migration;
-
 		}
-		echo "endloop \n  ";
-		if(!empty($newMigrations)){
+		
+		if(!empty($this->newMigrations)){
 			$this->saveMigrations();
-
+            echo "All new migrations saved. \n";
 		}else{
-			echo "All migrations have been Applied";
+			echo "All migrations are already up to date. \n";
 		}
 	}
 	public function createMigrationTable()

@@ -14,57 +14,113 @@ class Migration extends PDO
 	}
 
 	
-	public function applyMigration($value)
+	public function applyMigration($basePath)
 	{
-		$this->createMigrationTable();
-		$appliedMig = $this->getAppliedMigrations();
+        if (php_sapi_name() !== 'cli') {
+            throw new Exception("Migrations can only be run from the Command Line Interface.");
+        }
 
-		$files = scandir($value.'/Migrations');
-		$toApply = array_diff($files, $appliedMig);
-		foreach ($toApply as $migration) {
-			if($migration == '.' || $migration =='..' || $migration =='...'){
-				continue;
-			}
-			require_once $value.'/Migrations/'.$migration;
-			$className = pathinfo($migration,PATHINFO_FILENAME);
-			$instance = new $className();
-			echo '-->apping migration - '.$migration.PHP_EOL;
-			//$instance->up();
-			echo ' - '.$migration.' applied'.PHP_EOL.PHP_EOL.PHP_EOL;
-			$this->newMigrations[]= $migration;
+        $modelsDir = rtrim($basePath, '/') . '/App/models';
+        if (!is_dir($modelsDir)) {
+            throw new Exception("Model directory does not exist: $modelsDir");
+        }
 
-		}
-		if(!empty($newMigrations)){
-			$this->saveMigrations();
+        echo "Scanning models in: $modelsDir \n";
+        
+        // Ensure core classes are loaded for reflection
+        require_once rtrim($basePath, '/') . '/Core/libs/Model.php';
+        require_once rtrim($basePath, '/') . '/Core/libs/Attributes/Field.php';
+        
+        $files = $this->getPhpFiles($modelsDir);
+        $syncCount = 0;
 
-		}else{
-			echo "---* All migrations have been Applied *---".PHP_EOL.PHP_EOL;
-		}
-	}
-	public function createMigrationTable()
-	{
-		$this->exec("
-			CREATE TABLE IF NOT EXISTS migrations(
-			id INT AUTO_INCREMENT PRIMARY KEY,
-			migration VARCHAR(255),
-			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP )ENGINE=INNODB;");
+        foreach ($files as $file) {
+            require_once $file;
+        }
 
-	}
-	public function getAppliedMigrations()
-	{
-		$sth= $this->prepare("SELECT migrations FROM migration");
-		$sth->execute();
-		return $sth->fetchAll(PDO::FETCH_COLUMN);
+        foreach (get_declared_classes() as $className) {
+            if (is_subclass_of($className, 'Model')) {
+                $this->syncSchemaForModel($className);
+                $syncCount++;
+            }
+        }
+
+        echo "---* Schema Synchronization Complete ($syncCount Models Synced) *---" . PHP_EOL . PHP_EOL;
 	}
 
-	public function saveMigrations()
-	{
-		$str = implode(',' ,array_map($this->mFormart($m),$this->newMigrations));
-		$smt = $this->prepare("INSERT INTO migrations (migration) VALUES $str");
-		$smt->execute();
-		
-	}
-	private function mFormart($var ){ 	return "('$var')"; }
+    private function getPhpFiles($dir) {
+        $files = [];
+        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir));
+        foreach ($iterator as $file) {
+            if ($file->isFile() && $file->getExtension() === 'php') {
+                $files[] = $file->getPathname();
+            }
+        }
+        return $files;
+    }
+
+    private function syncSchemaForModel(string $className) {
+        $reflection = new ReflectionClass($className);
+        
+        // Derive table name. Fallback to lowercase class name + 's' if not defined static prop
+        $tableName = null;
+        if ($reflection->hasProperty('tableName')) {
+            $prop = $reflection->getProperty('tableName');
+            $prop->setAccessible(true);
+            $tableName = $prop->getValue();
+        }
+        
+        if (!$tableName) {
+            $tableName = strtolower($reflection->getShortName()) . 's';
+        }
+
+        echo "=> Syncing schema for table: $tableName (Model: {$reflection->getShortName()})\n";
+
+        $columns = [
+            "id INT AUTO_INCREMENT PRIMARY KEY"
+        ];
+
+        foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
+            $attributes = $property->getAttributes(\Core\Attributes\Field::class);
+            if (empty($attributes)) continue;
+
+            $fieldMeta = $attributes[0]->newInstance();
+            $name = $property->getName();
+
+            $sqlType = "VARCHAR(255)"; // Default
+            if ($fieldMeta->type === 'int') {
+                $sqlType = "INT";
+            } else if ($fieldMeta->type === 'boolean' || $fieldMeta->type === 'bool') {
+                $sqlType = "TINYINT(1)";
+            } else if ($fieldMeta->type === 'text') {
+                $sqlType = "TEXT";
+            }
+
+            $constraints = [];
+            if ($fieldMeta->required) {
+                $constraints[] = "NOT NULL";
+            }
+            if ($fieldMeta->unique) {
+                $constraints[] = "UNIQUE";
+            }
+
+            $columnDef = "`$name` $sqlType " . implode(' ', $constraints);
+            $columns[] = trim($columnDef);
+        }
+
+        // We also generally want created_at default timestamps
+        $columns[] = "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP";
+
+        $sql = "CREATE TABLE IF NOT EXISTS `$tableName` (\n  " . implode(",\n  ", $columns) . "\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+        
+        try {
+            $this->exec($sql);
+            echo "   [SUCCESS] Created/Verified table $tableName\n";
+        } catch (PDOException $e) {
+            echo "   [ERROR] Failed to sync $tableName: " . $e->getMessage() . "\n";
+        }
+    }
+
 	public function clearMigration()
 	{
 		$this->dropDB();
@@ -82,9 +138,6 @@ class Migration extends PDO
 	private function createDB()
 	{
 		$this->exec("CREATE DATABASE ".$this->_dbName);
-	}
-	public function create_user(){
-
 	}
 }
 

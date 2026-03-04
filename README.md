@@ -7,7 +7,7 @@ Vanila architecture bares striking resemblance to Codeigniter. However, being a 
 
 <p>Needs the following to run:</p>
 <ul>
-<li>PHP 7.2 and up</li>
+<li>PHP 8.4 and up</li>
 <li>Composer</li>
 <li>Database: MySQL</li>
 <li>Web Server: Apache (Mod Rewrite, Override)</li>

@@ -14,8 +14,14 @@ class SecreteController extends CommandController{
         
         
         try{
-            $config = LoadConfig($this->root_app.'/App/config/db.conf');
-            $db = new Migration(DB_TYPE,DB_HOST,DB_NAME, DB_USER ,DB_PASS);
+            require_once $this->root_app.'App/config/app.php';
+            $db = new Migration(
+                Config::get('DB_TYPE'),
+                Config::get('DB_HOST'),
+                Config::get('DB_NAME'),
+                Config::get('DB_USER'),
+                Config::get('DB_PASS')
+            );
             $db->exec("CREATE DATABASE $name;") or $db->errorInfo();
         }catch(PDOExcption $e){
             die("\033[31m ->DB Error : $e->getMessage() \033[0m ");

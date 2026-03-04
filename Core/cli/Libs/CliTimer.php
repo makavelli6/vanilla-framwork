@@ -5,17 +5,17 @@ class CliTimer{
     private $isStarted = false;
     private $diffarence = 0;
 
-    public function Start(Type $var = null)
+    public function Start(?Type $var = null)
     {
         # code...
     }
 
-    public function Stop(Type $var = null)
+    public function Stop(?Type $var = null)
     {
         # code...
     }
 
-    public function View(Type $var = null)
+    public function View(?Type $var = null)
     {
         # code...
     }

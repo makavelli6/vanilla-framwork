@@ -6,10 +6,16 @@ class  Api extends Controller {
 	function __construct()
 	{
 		parent::__construct();        
+        $this->loadService('api');
 	}
     function index(){
-        $data = array('jeff' => 'name', 'fish' => 'Getto');
-        $this->view->Json($data);
+        // Using the newly implemented Service Architecture
+        $data = $this->service->genreList();
+        
+        $this->view->Json([
+            'status' => 'success',
+            'data' => $data
+        ]);
     }
     function john($data = '',$data2 = '')
     {

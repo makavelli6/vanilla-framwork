@@ -9,11 +9,15 @@ class Controller
 		$this->view = new View();
 		$this->template = new Template();
 
-        if(Host_ != '' && User_Name_ != '' && Password_ != '' && Port_ ){
-            $this->mail = new Mailer(Host_, SMTP_Auth_, User_Name_, Password_, Port_);
-        }
+		$host = Config::get('SMTP_Host');
+		$user = Config::get('SMTP_User');
+		$pass = Config::get('SMTP_Pass');
+		$port = Config::get('SMTP_Port');
+		$auth = Config::get('SMTP_Auth');
 
-        
+        if($host != '' && $user != '' && $pass != '' && $port != ''){
+            $this->mail = new Mailer($host, $auth, $user, $pass, $port);
+        }
 		
 
 		
@@ -32,6 +36,15 @@ class Controller
 			$this->model = new $modelName();
 		}
 	}
+
+    public function loadService($name) {
+        $path = ROOT . 'App/services/' . ucfirst($name) . 'Service.php';
+        if (file_exists($path)) {
+            require_once $path;
+            $serviceName = ucfirst($name) . 'Service';
+            $this->service = new $serviceName();
+        }
+    }
 
 	protected function FetchGet( $filters)
     {

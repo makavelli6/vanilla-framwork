@@ -1,2 +1,6 @@
 .conf
 /vendor/
+
+.env
+
+*.xdb

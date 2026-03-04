@@ -78,35 +78,73 @@ class PortableDB extends PDO
 	*update{
 	*@param type $table -name  oftabe to insert into
 	*@param type $data An associate array
-	}
+	*}
 	*/
-	public function update($table,$data,$where){
-
+	public function update($table, $data, $whereConditions){
 		ksort($data);
-
 		$fieldDetails = null;
+
 		foreach ($data as $key => $value) {
 			$fieldDetails .= "`$key` = :$key," ;
 		}
 		$fieldDetails = rtrim($fieldDetails, ',');
-		$sth = $this->prepare("UPDATE `$table` SET $fieldDetails WHERE $where ");
+
+        $whereClause = "";
+        if (is_array($whereConditions) && !empty($whereConditions)) {
+            $whereClause = "WHERE ";
+            $conditions = [];
+            foreach ($whereConditions as $key => $value) {
+                $conditions[] = "`$key` = :w_$key";
+            }
+            $whereClause .= implode(" AND ", $conditions);
+        } else if (is_string($whereConditions) && !empty($whereConditions)) {
+            $whereClause = "WHERE " . $whereConditions;
+        }
+
+		$sth = $this->prepare("UPDATE `$table` SET $fieldDetails $whereClause");
 
 		foreach ($data as $key => $value) {
-			$sth->bindValue("$key","$value");
+			$sth->bindValue(":$key", $value);
 		}
+        
+        if (is_array($whereConditions)) {
+            foreach ($whereConditions as $key => $value) {
+                $sth->bindValue(":w_$key", $value);
+            }
+        }
+        
 		$sth->execute();
 	}
 
 	/**
 	*DELETE
 	*@param type string $table
-	*@param type string $where
+	*@param type array|string $whereConditions
 	*@param type  int $limit
-	*@return int affected rows
-
+	*@return bool success
 	*/
-	public  function  delete($table,$where, $limit =1){
-		return $this->exec("DELETE FROM `$table`  WHERE $where LIMIT $limit ");
+	public function delete($table, $whereConditions, $limit = 1){
+        $whereClause = "";
+        if (is_array($whereConditions) && !empty($whereConditions)) {
+            $whereClause = "WHERE ";
+            $conditions = [];
+            foreach ($whereConditions as $key => $value) {
+                $conditions[] = "`$key` = :w_$key";
+            }
+            $whereClause .= implode(" AND ", $conditions);
+        } else if (is_string($whereConditions) && !empty($whereConditions)) {
+            $whereClause = "WHERE " . $whereConditions;
+        }
+
+        $sth = $this->prepare("DELETE FROM `$table` $whereClause LIMIT $limit");
+        
+        if (is_array($whereConditions)) {
+            foreach ($whereConditions as $key => $value) {
+                $sth->bindValue(":w_$key", $value);
+            }
+        }
+        
+		return $sth->execute();
 	}
 	
 }

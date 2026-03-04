@@ -7,68 +7,55 @@ require_once __DIR__.'/../../Core/libs/Text.php';
 
 
 
+require_once __DIR__.'/../../Core/libs/Config.php';
+
 //PATHS
-//DO NT fORGET BACKSLASH (/) after path
-//define('URL','/AudioPlug/');
 function LoadConfig($file){
 	if(!file_exists($file)){
         Log::Error("config file does not exist".PHP_EOL.'<br>');
         Log::Info ($file);
         Log::Success( "-------SOLUTION------");
-        Log::Success("Run: php builder cofig:init ");
+        Log::Success("Run: php builder config:init ");
         Log::Success("---------------------");
         die();
-
 	}
 	return Json::decode_file($file);
 }
 
 $db = LoadConfig(__DIR__.'/db.conf');
 
-define('SITE','/');
-define('URL','/'); 
+// Load settings into Config registry instead of polluting global namespace
+Config::load([
+    // App Defaults
+    'SITE' => '/',
+    'URL'  => '/',
+    
+    // Database Settings
+    'DB_TYPE' => $db['DB_TYPE'],
+    'DB_HOST' => $db['DB_HOST'],
+    'DB_NAME' => $db['DB_NAME'],
+    'DB_USER' => $db['DB_USER'],
+    'DB_PASS' => $db['DB_PASS'],
+    
+    // Mailer Settings
+    'SMTP_Host' => '',
+    'SMTP_Auth' => true,
+    'SMTP_User' => '',
+    'SMTP_Pass' => '',
+    'SMTP_Port' => 100,
+    
+    // Security
+    'ENC_KEY' => 'CKXH2U9RPY3EFD70TLS1ZG4N8WQBOVI6AMJ5',
+    'HASH_GENKEY'  => 'mamasaymamasiadmamagusa',
+    'HASH_PASSKEY' => 'mamasaymamasiadmamagusa'
+]);
 
-define('DB_TYPE',$db['DB_TYPE']);
-define('DB_HOST',$db['DB_HOST']);
-define('DB_NAME',$db['DB_NAME']);
-define('DB_USER',$db['DB_USER']);
-define('DB_PASS',$db['DB_PASS']);
+// Time Constants (Safe to keep global for general utility logic)
+define('YEAR', 25920000); // 60*60*24*30*12
+define('MONTH', 2592000); // 60*60*24*30
+define('WEEK', 604800);   // 60*60*24*7
+define('DAY',  86400);    // 60*60*24
+define('HOUR', 3600);     // 60*60
+define('MINUTE', 60);
 
-
-
-define('Host_', '');
-define('SMTP_Auth_', true);
-define('User_Name_', '');
-define('Password_', '');
-define('Port_', 100);
-
-
-
-
-//if local host use
-//define('SITE','http://localhost/simpleMVC/');
-//define('URL','http://localhost/simpleMVC/'); 
-
-define('ENC_KEY','CKXH2U9RPY3EFD70TLS1ZG4N8WQBOVI6AMJ5');
-
-
-
-
-//constants
-//cite wide  hash key
-define('HASH_GENKEY', 'mamasaymamasiadmamagusa');
-define('HASH_PASSKEY', 'mamasaymamasiadmamagusa');
-
-//cite wide  hash key
-define('YEAR',25920000 );//60*60*24*30*12;
-define('MONTH',2592000 );//60*60*24*30;
-define('WEEK', 604800);//60*60*24*7;
-define('DAY',  86400);//60*60*24;
-define('HOUR', 3600);//60*60;
-define('MINUTE',60);//60;
-
-
-
-
-
- ?>
+?>

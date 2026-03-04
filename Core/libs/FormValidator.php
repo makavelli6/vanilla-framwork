@@ -136,8 +136,7 @@ class FormValidator
             break;
             case 'string':
             default:
-                $filter = FILTER_SANITIZE_STRING;
-                $flags = FILTER_FLAG_NO_ENCODE_QUOTES;
+                return strip_tags($var);
             break;
 
         }

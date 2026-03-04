@@ -1,117 +1,154 @@
 <?php
-/**
- * 
- */
-class Text  {
+class Text {
 	
-	public  function write_file($file,$txt = '')
-	{
-		// w	Open a file for write only.
-		// Erases the contents of the file or creates a new file if it doesn't exist.
-		// File pointer starts at the beginning of the file
-		$handle = fopen($file, "w");
-		fwrite($handle, $txt);
+	public static function write_file($file, $txt = '') {
+		$handle = @fopen($file, "w");
+        if (!$handle) return false;
+        
+        if (flock($handle, LOCK_EX)) {
+            $result = fwrite($handle, $txt);
+            flock($handle, LOCK_UN);
+            fclose($handle);
+            return $result !== false;
+        }
 		fclose($handle);
+        return false;
 	}
-	public static function write_file_plus($file,$txt)
-	{
-		// w+	Open a file for read/write. 
-		// Erases the contents of the file or creates a new file if it doesn't exist. 
-		// File pointer starts at the beginning of the file
-		$handle = fopen($file, "w+")or die("Unable to open file!");
-		fwrite($handle, $txt);
-		fclose($handle);
+
+	public static function write_file_plus($file, $txt) {
+		$handle = @fopen($file, "w+");
+        if (!$handle) return false;
+        
+        if (flock($handle, LOCK_EX)) {
+		    $result = fwrite($handle, $txt);
+            flock($handle, LOCK_UN);
+		    fclose($handle);
+            return $result !== false;
+        }
+        fclose($handle);
+        return false;
 	}
-	public static function read_file_plus($file)
-	{
-		// r+	Open a file for read/write. 
-		// File pointer starts at the beginning of the file
-		//$content = fread($fp, filesize($filename));
-		$handle = fopen($file, "r+");
-		$content =fread($handle,filesize($file));
+
+	public static function read_file_plus($file) {
+        if (!file_exists($file)) return false;
+		$handle = @fopen($file, "r+");
+        if (!$handle) return false;
+
+        $content = false;
+        if (flock($handle, LOCK_SH)) {
+            $size = filesize($file);
+            if ($size > 0) {
+		        $content = fread($handle, $size);
+            } else {
+                $content = "";
+            }
+            flock($handle, LOCK_UN);
+        }
 		fclose($handle);
 		return $content;
 	}
-		public function read_file_plus_array($file)
-	{
-		// r+	Open a file for read/write. 
-		// File pointer starts at the beginning of the file
-		$handle = fopen($file, "r+");
-		while(!feof($handle)) {
-			$data = fgets($handle);
-		}
+
+	public static function read_file_plus_array($file) {
+        if (!file_exists($file)) return false;
+		$handle = @fopen($file, "r+");
+        if (!$handle) return false;
+        
+        $data = [];
+        if (flock($handle, LOCK_SH)) {
+		    while(!feof($handle)) {
+			    $line = fgets($handle);
+                if ($line !== false) {
+                    $data[] = $line;
+                }
+		    }
+            flock($handle, LOCK_UN);
+        }
 		fclose($handle);
-		return $data;
+		return empty($data) ? "" : implode("", $data);
 	}
-		public static function read_file($file)
-	{
-		// r+	Open a file for read/write. 
-		// File pointer starts at the beginning of the file
-		$handle =fopen($file, "r");
-		$content = fread($handle,filesize($file));
+
+	public static function read_file($file) {
+        if (!file_exists($file)) return false;
+		$handle = @fopen($file, "r");
+        if (!$handle) return false;
+        
+        $content = false;
+        if (flock($handle, LOCK_SH)) {
+            $size = filesize($file);
+            if ($size > 0) {
+		        $content = fread($handle, $size);
+            } else {
+                $content = "";
+            }
+            flock($handle, LOCK_UN);
+        }
 		fclose($handle);
 		return $content;
-		
-	}
-		public function read_file_array($file)
-	{
-		// r+	Open a file for read/write. 
-		// File pointer starts at the beginning of the file
-		$data ='';
-		fopen($file, "r");
-		while(!feof($file)) {
-			$data = fgets($file);
-		}
-		fclose($file);
-		return $data;
 	}
 
+	public static function read_file_array($file) {
+        if (!file_exists($file)) return false;
+		$handle = @fopen($file, "r");
+        if (!$handle) return false;
 
-
-	public static function create_file($file)
-	{
-		// x	Creates a new file for write only. 
-		//Returns FALSE and an error if file already exists
-		$handle =fopen($file, "x");
-		if ($handle==FALSE) {
-			#file all ready exits
-			return 0;
-		}
+        $data = [];
+        if (flock($handle, LOCK_SH)) {
+		    while(!feof($handle)) {
+			    $line = fgets($handle);
+                if ($line !== false) {
+                    $data[] = $line;
+                }
+		    }
+            flock($handle, LOCK_UN);
+        }
 		fclose($handle);
-		
+		return empty($data) ? "" : implode("", $data);
 	}
-	public static function create_file_plus($file)
-	{
-		// x+	Creates a new file for read/write. 
-		// Returns FALSE and an error if file already exists
-		$handle = fopen($file, "x+");
-		if ($handle==FALSE) {
-			#file all ready exits
-			return 0;
+
+	public static function create_file($file) {
+		$handle = @fopen($file, "x");
+		if ($handle === false) {
+			return false;
 		}
 		fclose($handle);
-	}
-	public function append_file($file,$txt)
-	{
-		// a	Open a file for write only. 
-		// The existing data in file is preserved. 
-		//File pointer starts at the end of the file. 
-		//Creates a new file if the file doesn't exist
-		$handle = fopen($file, "a");
-		fwrite($handle, $txt);
-		fclose($handle);
-	}
-	public function append_file_plus($file,$txt)
-	{
-		// a+	Open a file for read/write. 
-		// The existing data in file is preserved. 
-		//File pointer starts at the end of the file. 
-		//Creates a new file if the file doesn't exist.
-		$handle = fopen($file, "a+");
-		fwrite($handle, $txt);
-		fclose($handle);
+        return true;
 	}
 
+	public static function create_file_plus($file) {
+		$handle = @fopen($file, "x+");
+		if ($handle === false) {
+			return false;
+		}
+		fclose($handle);
+        return true;
+	}
+
+	public static function append_file($file, $txt) {
+		$handle = @fopen($file, "a");
+        if (!$handle) return false;
+
+        if (flock($handle, LOCK_EX)) {
+		    $result = fwrite($handle, $txt);
+            flock($handle, LOCK_UN);
+		    fclose($handle);
+            return $result !== false;
+        }
+        fclose($handle);
+        return false;
+	}
+
+	public static function append_file_plus($file, $txt) {
+		$handle = @fopen($file, "a+");
+        if (!$handle) return false;
+
+        if (flock($handle, LOCK_EX)) {
+		    $result = fwrite($handle, $txt);
+            flock($handle, LOCK_UN);
+		    fclose($handle);
+            return $result !== false;
+        }
+        fclose($handle);
+        return false;
+	}
 }
-
- ?>
+?>
