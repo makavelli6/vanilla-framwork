@@ -35,33 +35,61 @@ class User extends Model
 ```
 
 **Available Field Options:**
-- `type`: The generic data type (`"string"`, `"int"`, etc.)
-- `required`: Boolean representing if the field cannot be null.
-- `unique`: Boolean representing a UNIQUE constraint in the database.
-- `min` / `max`: For `int` types, defines numeric boundaries dynamically validated before insertion.
+
+| Option     | Type    | Default  | Description                                              |
+|------------|---------|----------|----------------------------------------------------------|
+| `type`     | string  | `'string'` | Generic data type (`"string"`, `"int"`, `"text"`, `"boolean"`, `"date"`, `"datetime"`, `"float"`) |
+| `required` | bool    | `false`  | If true, column is `NOT NULL`                            |
+| `unique`   | bool    | `false`  | Adds a `UNIQUE` constraint                               |
+| `nullable` | bool    | `true`   | Whether the column allows `NULL` values                  |
+| `default`  | mixed   | `null`   | SQL `DEFAULT` value for the column                       |
+| `min`/`max`| ?int    | `null`   | For `int` types, numeric boundaries validated before insertion |
+
+**Type Mapping:**
+
+| Field Type          | MySQL Type     |
+|---------------------|----------------|
+| `"string"` (default)| `VARCHAR(255)` |
+| `"int"`             | `INT`          |
+| `"text"`            | `TEXT`         |
+| `"boolean"` / `"bool"` | `TINYINT(1)` |
+| `"date"`            | `DATE`         |
+| `"datetime"`        | `DATETIME`     |
+| `"float"` / `"double"` | `DOUBLE`   |
 
 ---
 
-## 2. Auto-Migrations (Code-First Schemas)
+## 2. Auto-Migrations (Code-First Schema Sync)
 
-You **never** need to write `CREATE TABLE` manual migration files again. The framework contains an automated Migration engine that scans your `App/models/` directory, reflects over your `#[Field]` attributes, and builds the MySQL database structures dynamically!
+You **never** need to write `CREATE TABLE` or `ALTER TABLE` statements manually. The Migration engine scans `App/models/`, reflects over your `#[Field]` attributes, and **synchronizes** the MySQL schema automatically — including adding, modifying, and dropping columns.
 
 ### Running Migrations
 
-To synchronize your PHP Models with the Database, simply run the CLI builder command:
-
 ```bash
-php builder migration:run
+php vanilla migration run
 ```
 
-**How it works:**
-1. The `Migration::applyMigration` compiler opens `App/models/`.
-2. It finds all valid classes that `extend Model`.
-3. It maps `#[Field(type: 'string')]` to MySQL `VARCHAR(255)`.
-4. It maps `#[Field(type: 'int')]` to MySQL `INT`.
-5. It applies constraints (`NOT NULL`, `UNIQUE`) automatically and executes `CREATE TABLE IF NOT EXISTS`.
+### How it works:
 
-*If you change a model property later, just re-run the command to ensure the schema remains synchronized!*
+1. `Migration::applyMigration` scans all PHP files in `App/models/`.
+2. For each class that `extends Model`, it reads the `#[Field]` attributes via PHP Reflection.
+3. **If the table doesn't exist** — generates a `CREATE TABLE` statement.
+4. **If the table already exists** — introspects the database with `SHOW COLUMNS`, diffs against the model, and generates targeted `ALTER TABLE` statements:
+   - **New fields** → `ALTER TABLE ... ADD COLUMN`
+   - **Changed fields** (type, nullability, unique) → `ALTER TABLE ... MODIFY COLUMN`
+   - **Removed fields** → `ALTER TABLE ... DROP COLUMN` *(with CLI confirmation prompt)*
+5. Unique indexes are managed automatically (added/removed as the `unique` attribute changes).
+
+### Other Migration Commands
+
+| Command                      | Description                                                    |
+|------------------------------|----------------------------------------------------------------|
+| `php vanilla migration run`     | Sync all model schemas to the database                      |
+| `php vanilla migration clear`   | **Drop** the entire database and recreate it (destructive!) |
+| `php vanilla migration refresh` | Clear + re-run all migrations from scratch                  |
+
+*If you add, change, or remove a model property, simply re-run `php vanilla migration run` to bring the database in sync!*
+
 
 ---
 
