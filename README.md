@@ -9,7 +9,7 @@ Vanila architecture bares striking resemblance to Codeigniter. However, being a 
 <ul>
 <li>PHP 8.4 and up</li>
 <li>Composer</li>
-<li>Database: MySQL</li>
+<li>Database: MySQL or SQLite (via PDO)</li>
 <li>Web Server: Apache (Mod Rewrite, Override)</li>
 </ul>
 

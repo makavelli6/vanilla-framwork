@@ -4,6 +4,29 @@ The Vanilla Framework uses a modern, Mongoose-like **Active Record ORM** powered
 
 ---
 
+## 0. Database Configuration
+
+The framework supports multiple database drivers. You can configure your database in `App/config/db.conf` (JSON format) and `App/config/app.php`.
+
+### Valid Configuration Keys:
+- `DB_TYPE`: `"mysql"` or `"sqlite"`.
+- `DB_NAME`: The database name (for MySQL) or the filename (for SQLite).
+- `DB_HOST`: Server address (for MySQL). For SQLite, this can be empty (defaults to `ROOT/DataBase/`).
+- `DB_USER` / `DB_PASS`: Credentials (for MySQL).
+
+### Example JSON (`db.conf`):
+```json
+{
+  "DB_TYPE": "sqlite",
+  "DB_NAME": "my_project",
+  "DB_HOST": "",
+  "DB_USER": "",
+  "DB_PASS": ""
+}
+```
+
+---
+
 ## 1. Defining Models (Schemas)
 
 Models live in `App/models/`. Unlike legacy frameworks where models hold business logic and messy database queries, our Models act strictly as **Schema Declarations**.
@@ -47,15 +70,15 @@ class User extends Model
 
 **Type Mapping:**
 
-| Field Type          | MySQL Type     |
-|---------------------|----------------|
-| `"string"` (default)| `VARCHAR(255)` |
-| `"int"`             | `INT`          |
-| `"text"`            | `TEXT`         |
-| `"boolean"` / `"bool"` | `TINYINT(1)` |
-| `"date"`            | `DATE`         |
-| `"datetime"`        | `DATETIME`     |
-| `"float"` / `"double"` | `DOUBLE`   |
+| Field Type          | MySQL Type     | SQLite Type    |
+|---------------------|----------------|----------------|
+| `"string"` (default)| `VARCHAR(255)` | `VARCHAR(255)` |
+| `"int"`             | `INT`          | `INTEGER`      |
+| `"text"`            | `TEXT`         | `TEXT`         |
+| `"boolean"` / `"bool"` | `TINYINT(1)` | `INTEGER`      |
+| `"date"`            | `DATE`         | `DATE`         |
+| `"datetime"`        | `DATETIME`     | `DATETIME`     |
+| `"float"` / `"double"` | `DOUBLE`   | `DOUBLE`       |
 
 ---
 
@@ -73,12 +96,16 @@ php vanilla migration run
 
 1. `Migration::applyMigration` scans all PHP files in `App/models/`.
 2. For each class that `extends Model`, it reads the `#[Field]` attributes via PHP Reflection.
-3. **If the table doesn't exist** — generates a `CREATE TABLE` statement.
-4. **If the table already exists** — introspects the database with `SHOW COLUMNS`, diffs against the model, and generates targeted `ALTER TABLE` statements:
-   - **New fields** → `ALTER TABLE ... ADD COLUMN`
-   - **Changed fields** (type, nullability, unique) → `ALTER TABLE ... MODIFY COLUMN`
-   - **Removed fields** → `ALTER TABLE ... DROP COLUMN` *(with CLI confirmation prompt)*
-5. Unique indexes are managed automatically (added/removed as the `unique` attribute changes).
+3. **If the table doesn't exist** — generates a `CREATE TABLE` statement (using `AUTO_INCREMENT` for MySQL or `AUTOINCREMENT` for SQLite).
+4. **If the table already exists** — introspects the database using driver-aware queries (e.g. `SHOW COLUMNS` vs `PRAGMA table_info`):
+   - **New fields** → `ALTER TABLE ... ADD COLUMN` (Works for all)
+   - **Changed fields** (type, nullability, unique) →
+     - **MySQL**: `ALTER TABLE ... MODIFY COLUMN`
+     - **SQLite**: **Automatic Table Reconstruction**. Because SQLite doesn't natively support modifying columns, the framework automatically creates a temporary table with the new schema, migrates your data, and swaps the tables.
+   - **Removed fields** → 
+     - **MySQL**: `ALTER TABLE ... DROP COLUMN`
+     - **SQLite**: Automatic Table Reconstruction.
+5. Unique indexes are managed automatically across both drivers.
 
 ### Other Migration Commands
 

@@ -1,4 +1,42 @@
-# Vanilla Framework — Changelog
+## [2.1.0] — 2026-04-01 — Database Driver & Migration Refactor
+
+Thin release consolidates the database connection layer to support multiple PDO-compatible drivers (MySQL & SQLite) through a unified `Database` class, and upgrades the Migration Engine to be fully driver-aware.
+
+---
+
+### 🗄️ Multi-Driver Database Support
+
+**Modified** `Core/libs/Database.php`
+- Unified connection layer: The `Database` class now dynamically generates DSN strings based on the `DB_TYPE` configuration.
+- **SQLite Support**: Automatic directory creation for SQLite databases in `ROOT/DataBase/`.
+- **MySQL Support**: Maintains full backward compatibility with existing configurations.
+- Improved security: `insert()`, `update()`, and `delete()` now strictly use parameterized bindings with associative array matchers.
+
+**Deleted** `Core/libs/PortableDB.php`
+- Legacy SQLite-only database handler removed. All functionality merged into the main `Database` class.
+
+**Modified** `Core/libs/Model.php`
+- Removed dependency on `PortableDB`. All models now utilize the unified `Database` connection.
+
+---
+
+### 🚀 Driver-Agnostic Migration Engine
+
+**Modified** `Core/libs/Migration.php`
+- **Inheritance**: Now extends the `Database` class to share connection and DSN logic.
+- **Dynamic Introspection**: Implemented driver-specific schema detection:
+  - **MySQL**: Uses `SHOW TABLES` and `SHOW COLUMNS`.
+  - **SQLite**: Uses `sqlite_master` and `PRAGMA table_info` (including unique index detection).
+- **Driver-Aware Table Creation**: Correctly handles `AUTO_INCREMENT` (MySQL) vs `AUTOINCREMENT` (SQLite).
+- **SQLite Alter Support**: Implemented a "temp-swap" strategy for SQLite to handle complex schema changes (modifying or dropping columns) that are not natively supported by SQLite's `ALTER TABLE`.
+
+---
+
+### 🔧 Configuration
+
+**Modified** `App/config/app.php` & `db.conf`
+- Standardized database configuration schema. 
+- Switching between MySQL and SQLite is now as simple as changing `DB_TYPE` in your configuration.
 
 ---
 

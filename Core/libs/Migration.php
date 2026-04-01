@@ -1,5 +1,5 @@
-<?php 
-require_once __DIR__.'/Logger.php';
+<?php
+require_once __DIR__ . '/Database.php';
 /**
  * Migration Engine with Schema Diffing & ALTER TABLE Support
  * 
@@ -7,16 +7,13 @@ require_once __DIR__.'/Logger.php';
  * introspects the existing database schema, diffs them, and generates
  * CREATE TABLE or ALTER TABLE statements as needed.
  */
-class Migration extends PDO
+class Migration extends Database
 {
 	private $newMigrations = [];
-	private $_dbName = '';
 
-	public function __construct($db_type,$db_host,$db_name,$db_user,$db_pas)
+	public function __construct($db_type, $db_host, $db_name, $db_user, $db_pass)
 	{
-		parent::__construct($db_type.':host='.$db_host.';dbname='.$db_name,$db_user,$db_pas);
-		$this->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$this->_dbName = $db_name;
+		parent::__construct($db_type, $db_host, $db_name, $db_user, $db_pass);
 	}
 
 	
@@ -115,40 +112,56 @@ class Migration extends PDO
      * Check if a table exists in the current database.
      */
     private function tableExists(string $tableName): bool {
-        $stmt = $this->prepare("SHOW TABLES LIKE :table");
+        if ($this->_dbType === 'sqlite') {
+            $stmt = $this->prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=:table");
+        } else {
+            $stmt = $this->prepare("SHOW TABLES LIKE :table");
+        }
         $stmt->execute([':table' => $tableName]);
-        return $stmt->rowCount() > 0;
+        return $stmt->fetch() !== false;
     }
 
     /**
      * Retrieve existing column metadata from the database.
-     * Returns an associative array keyed by column name:
-     * [
-     *   'column_name' => [
-     *       'type'     => 'varchar(255)',
-     *       'nullable' => true,
-     *       'key'      => 'UNI',   // PRI, UNI, MUL, or ''
-     *       'default'  => null,
-     *       'extra'    => 'auto_increment'
-     *   ]
-     * ]
      */
     private function getExistingColumns(string $tableName): array {
-        $stmt = $this->prepare("SHOW COLUMNS FROM `$tableName`");
-        $stmt->execute();
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if ($this->_dbType === 'sqlite') {
+            $stmt = $this->prepare("PRAGMA table_info(`$tableName`)");
+            $stmt->execute();
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $columns = [];
-        foreach ($rows as $row) {
-            $columns[$row['Field']] = [
-                'type'     => strtoupper($row['Type']),
-                'nullable' => ($row['Null'] === 'YES'),
-                'key'      => $row['Key'],
-                'default'  => $row['Default'],
-                'extra'    => $row['Extra'],
-            ];
+            $columns = [];
+            foreach ($rows as $row) {
+                // SQLite PRAGMA table_info columns: cid, name, type, notnull, dflt_value, pk
+                $colName = $row['name'];
+                $isUnique = in_array('UNIQUE', $this->getColumnIndexes($tableName, $colName));
+                
+                $columns[$colName] = [
+                    'type'     => strtoupper($row['type']),
+                    'nullable' => ($row['notnull'] == 0),
+                    'key'      => ($row['pk'] > 0) ? 'PRI' : ($isUnique ? 'UNI' : ''),
+                    'default'  => $row['dflt_value'],
+                    'extra'    => '', 
+                ];
+            }
+            return $columns;
+        } else {
+            $stmt = $this->prepare("SHOW COLUMNS FROM `$tableName`");
+            $stmt->execute();
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $columns = [];
+            foreach ($rows as $row) {
+                $columns[$row['Field']] = [
+                    'type'     => strtoupper($row['Type']),
+                    'nullable' => ($row['Null'] === 'YES'),
+                    'key'      => $row['Key'],
+                    'default'  => $row['Default'],
+                    'extra'    => $row['Extra'],
+                ];
+            }
+            return $columns;
         }
-        return $columns;
     }
 
     // =========================================================================
@@ -288,6 +301,14 @@ class Migration extends PDO
     // =========================================================================
 
     private function applyDiff(string $tableName, array $diff): void {
+        if ($this->_dbType === 'sqlite') {
+            $this->applyDiffSqlite($tableName, $diff);
+        } else {
+            $this->applyDiffMysql($tableName, $diff);
+        }
+    }
+
+    private function applyDiffMysql(string $tableName, array $diff): void {
         $hasChanges = false;
 
         // --- ADD columns ---
@@ -313,7 +334,6 @@ class Migration extends PDO
 
             // Handle unique constraint changes
             $desiredUnique = ($colDef['key'] === 'UNI');
-            // We need to check if a unique index currently exists
             $existingIndexes = $this->getColumnIndexes($tableName, $colName);
             $hasUniqueIndex = in_array('UNIQUE', $existingIndexes);
 
@@ -321,7 +341,6 @@ class Migration extends PDO
                 $indexSQL = "ALTER TABLE `$tableName` ADD UNIQUE INDEX `uq_{$tableName}_{$colName}` (`$colName`)";
                 $this->executeAlter($tableName, $indexSQL, "ADD UNIQUE INDEX on `$colName`");
             } elseif (!$desiredUnique && $hasUniqueIndex) {
-                // Find and drop the unique index
                 $indexName = $this->findUniqueIndexName($tableName, $colName);
                 if ($indexName) {
                     $dropIdxSQL = "ALTER TABLE `$tableName` DROP INDEX `$indexName`";
@@ -330,7 +349,7 @@ class Migration extends PDO
             }
         }
 
-        // --- DROP columns (with CLI confirmation) ---
+        // --- DROP columns ---
         if (!empty($diff['drop'])) {
             echo "\n   [WARNING] The following columns exist in the database but NOT in the model:\n";
             foreach ($diff['drop'] as $colName => $colDef) {
@@ -346,14 +365,63 @@ class Migration extends PDO
                     $this->executeAlter($tableName, $alterSQL, "DROP COLUMN `$colName`");
                     $hasChanges = true;
                 }
-            } else {
-                echo "   -> Skipped dropping columns.\n";
             }
         }
 
         if (!$hasChanges) {
             echo "   [OK] Table `$tableName` is already in sync.\n";
         }
+    }
+
+    private function applyDiffSqlite(string $tableName, array $diff): void {
+        // SQLite only supports ALTER TABLE ADD COLUMN.
+        // MODIFY and DROP require recreating the table.
+        if (empty($diff['modify']) && empty($diff['drop'])) {
+            // Only additions
+            foreach ($diff['add'] as $colName => $colDef) {
+                $sql = $this->buildColumnSQL($colName, $colDef);
+                if ($colDef['key'] === 'UNI') {
+                    $sql .= ' UNIQUE';
+                }
+                $this->exec("ALTER TABLE `$tableName` ADD COLUMN $sql");
+                echo "   [SUCCESS] $tableName -> ADD COLUMN `$colName` (SQLite)\n";
+            }
+            if (empty($diff['add'])) {
+                echo "   [OK] Table `$tableName` is already in sync.\n";
+            }
+        } else {
+            // Complex change: Recreate table
+            echo "   [INFO] Recreating SQLite table `$tableName` to apply modifications/drops...\n";
+            
+            $existingColumns = array_keys($this->getExistingColumns($tableName));
+            $desiredColumnsForCreation = $this->buildDesiredSchema(new ReflectionClass($this->getCurrentModelClass($tableName)));
+            
+            $tempTable = $tableName . '_temp';
+            $this->createTable($tempTable, $desiredColumnsForCreation);
+            
+            // Intersection of columns to copy
+            $newColumns = array_keys($this->getExistingColumns($tempTable));
+            $commonColumns = array_intersect($existingColumns, $newColumns);
+            $colList = implode(', ', array_map(fn($c) => "`$c`", $commonColumns));
+            
+            $this->exec("INSERT INTO `$tempTable` ($colList) SELECT $colList FROM `$tableName` ");
+            $this->exec("DROP TABLE `$tableName` ");
+            $this->exec("ALTER TABLE `$tempTable` RENAME TO `$tableName` ");
+            
+            echo "   [SUCCESS] $tableName -> Refactored table structure (SQLite)\n";
+        }
+    }
+
+    private function getCurrentModelClass(string $tableName): ?string {
+        foreach (get_declared_classes() as $className) {
+            if (is_subclass_of($className, 'Model')) {
+                // Simplified check - assumes pluralization as done in resolveTableName
+                if ($this->resolveTableName(new ReflectionClass($className)) === $tableName) {
+                    return $className;
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -396,19 +464,36 @@ class Migration extends PDO
 
     /**
      * Get the types of indexes on a specific column.
-     * Returns an array like ['UNIQUE', 'PRIMARY'] etc.
      */
     private function getColumnIndexes(string $tableName, string $colName): array {
-        $stmt = $this->prepare("SHOW INDEX FROM `$tableName` WHERE Column_name = :col");
-        $stmt->execute([':col' => $colName]);
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         $types = [];
-        foreach ($rows as $row) {
-            if ($row['Non_unique'] == 0) {
-                $types[] = 'UNIQUE';
-            } else {
-                $types[] = 'INDEX';
+        if ($this->_dbType === 'sqlite') {
+            $stmt = $this->prepare("PRAGMA index_list(`$tableName`)");
+            $stmt->execute();
+            $indexes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($indexes as $idx) {
+                $stmt = $this->prepare("PRAGMA index_info(`" . $idx['name'] . "`)");
+                $stmt->execute();
+                $cols = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                foreach ($cols as $col) {
+                    if ($col['name'] === $colName) {
+                        $types[] = ($idx['unique'] == 1) ? 'UNIQUE' : 'INDEX';
+                    }
+                }
+            }
+        } else {
+            $stmt = $this->prepare("SHOW INDEX FROM `$tableName` WHERE Column_name = :col");
+            $stmt->execute([':col' => $colName]);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($rows as $row) {
+                if ($row['Non_unique'] == 0) {
+                    $types[] = 'UNIQUE';
+                } else {
+                    $types[] = 'INDEX';
+                }
             }
         }
         return $types;
@@ -418,12 +503,31 @@ class Migration extends PDO
      * Find the name of a unique index on a specific column.
      */
     private function findUniqueIndexName(string $tableName, string $colName): ?string {
-        $stmt = $this->prepare("SHOW INDEX FROM `$tableName` WHERE Column_name = :col AND Non_unique = 0");
-        $stmt->execute([':col' => $colName]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($this->_dbType === 'sqlite') {
+            $stmt = $this->prepare("PRAGMA index_list(`$tableName`)");
+            $stmt->execute();
+            $indexes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        if ($row && $row['Key_name'] !== 'PRIMARY') {
-            return $row['Key_name'];
+            foreach ($indexes as $idx) {
+                if ($idx['unique'] == 1) {
+                    $stmt = $this->prepare("PRAGMA index_info(`" . $idx['name'] . "`)");
+                    $stmt->execute();
+                    $cols = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    foreach ($cols as $col) {
+                        if ($col['name'] === $colName) {
+                            return $idx['name'];
+                        }
+                    }
+                }
+            }
+        } else {
+            $stmt = $this->prepare("SHOW INDEX FROM `$tableName` WHERE Column_name = :col AND Non_unique = 0");
+            $stmt->execute([':col' => $colName]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($row && $row['Key_name'] !== 'PRIMARY') {
+                return $row['Key_name'];
+            }
         }
         return null;
     }
@@ -433,9 +537,12 @@ class Migration extends PDO
     // =========================================================================
 
     private function createTable(string $tableName, array $desiredColumns): void {
-        $columnDefs = [
-            "`id` INT AUTO_INCREMENT PRIMARY KEY"
-        ];
+        $columnDefs = [];
+        if ($this->_dbType === 'sqlite') {
+            $columnDefs[] = "`id` INTEGER PRIMARY KEY AUTOINCREMENT";
+        } else {
+            $columnDefs[] = "`id` INT AUTO_INCREMENT PRIMARY KEY";
+        }
 
         foreach ($desiredColumns as $colName => $colDef) {
             $line = $this->buildColumnSQL($colName, $colDef);
@@ -450,7 +557,13 @@ class Migration extends PDO
 
         $sql = "CREATE TABLE IF NOT EXISTS `$tableName` (\n  " 
              . implode(",\n  ", $columnDefs) 
-             . "\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+             . "\n)";
+        
+        if ($this->_dbType !== 'sqlite') {
+             $sql .= " ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+        } else {
+             $sql .= ";";
+        }
 
         try {
             $this->exec($sql);
@@ -459,32 +572,6 @@ class Migration extends PDO
             echo "   [ERROR] Failed to create `$tableName`: " . $e->getMessage() . "\n";
         }
     }
-
-    // =========================================================================
-    //  Database-level Operations (clear / refresh)
-    // =========================================================================
-
-	public function clearMigration()
-	{
-		$this->dropDB();
-		$this->createDB();
-	}
-
-	public function refreshMigration($base)
-	{
-		$this->clearMigration();
-		$this->applyMigration($base);
-	}
-
-	private function dropDB()
-	{
-		$this->exec("DROP DATABASE IF EXISTS ".$this->_dbName.";");
-	}
-
-	private function createDB()
-	{
-		$this->exec("CREATE DATABASE ".$this->_dbName);
-	}
 }
 
 

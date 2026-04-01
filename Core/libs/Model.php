@@ -1,6 +1,5 @@
 <?php 
 require_once __DIR__.'/Logger.php';
-require_once __DIR__.'/LevelDB.php';
 require_once __DIR__.'/ORM/QueryBuilder.php';
 
 use Core\Attributes\Field;
@@ -8,17 +7,11 @@ use Core\Attributes\Field;
 abstract class Model
 {
     public $db;
-    public $portabeDB;
     protected static $dbConnection = null;
     protected static $tableName = null; // Set in child classes ideally
 
     public function __construct()
     {
-        // Legacy fallback connections for old instances
-		try {
-			$this->portabeDB = new PortableDB('core.db');
-		} catch (PDOException $e) { }
-
         // Use global static connection if available, otherwise spin up local
         if (self::$dbConnection) {
             $this->db = self::$dbConnection;
