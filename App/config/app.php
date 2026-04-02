@@ -24,7 +24,10 @@ function LoadConfig($file){
 
 $db = LoadConfig(__DIR__.'/db.conf');
 
-// Load settings into Config registry instead of polluting global namespace
+// Load settings into Config registry and define globals for backward compatibility
+define('SITE', $db['SITE'] ?? '/');
+define('URL',  $db['URL'] ?? '/');
+
 Config::load([
     // App Defaults
     'SITE' => '/',

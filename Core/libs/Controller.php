@@ -2,6 +2,11 @@
 
 class Controller
 {
+    public $view;
+    public $template;
+    public $mail;
+    public $model;
+    public $service;
 	
 	function __construct()
 	{

@@ -3,6 +3,7 @@
 /**
  * 
  */
+#[AllowDynamicProperties]
 class View
 {
 	public $path = ROOT.VIEWS;

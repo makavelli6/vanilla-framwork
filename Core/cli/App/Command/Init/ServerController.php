@@ -23,7 +23,7 @@ class ServerController extends CommandController{
         
         echo($this->root_app);
 
-        shell_exec('php -S localhost:8000  '.getcwd().'/Public/system.php');
+        shell_exec('php -S localhost:'.$port.'  '.getcwd().'/Public/system.php');
         $this->getPrinter()->display_success("-> Successful: User Created");
         
     }

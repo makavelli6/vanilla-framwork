@@ -1,3 +1,27 @@
+## [2.3.0] — 2026-04-02 — Modern PHP Compatibility & Global Constants
+
+This release hardens the framework for PHP 8.2, 8.3, and 8.4 by resolving core deprecation warnings and restoring critical global constants for view templates.
+
+---
+
+### 🛡️ PHP 8.2+ Compatibility
+
+**Modified** `Core/libs/Controller.php`
+- **Explicit Property Declaration**: Defined `view`, `template`, `mail`, `model`, and `service` properties to eliminate dynamic property deprecation warnings.
+
+**Modified** `Core/libs/View.php`
+- **Dynamic Attribute Support**: Added the `#[AllowDynamicProperties]` attribute. This preserves the framework's core feature of allowing controllers to dynamically assign variables to views (e.g., `$this->view->title = 'Home'`) without triggering modern PHP errors.
+
+---
+
+### 🌍 Global Configuration & Templates
+
+**Modified** `App/config/app.php`
+- **Constant Restoration**: Re-introduced `define('URL', ...)` and `define('SITE', ...)` global constants. This fixes the `Undefined constant "URL"` fatal error previously encountered in view headers (`Head.php`).
+- **Synchronized Config**: Constants are now automatically synced with the `Config` registry values during bootstrap.
+
+---
+
 ## [2.2.0] — 2026-04-02 — Unified Logger & CLI Standardization
 
 This release introduces a sophisticated `Logger` class for cross-environment feedback and standardizes all terminal output for a professional developer experience.
