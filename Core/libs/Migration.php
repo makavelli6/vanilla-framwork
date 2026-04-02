@@ -28,7 +28,7 @@ class Migration extends Database
             throw new Exception("Model directory does not exist: $modelsDir");
         }
 
-        echo "Scanning models in: $modelsDir \n";
+        Logger::Info("Scanning models in: $modelsDir");
         
         // Ensure core classes are loaded for reflection
         require_once rtrim($basePath, '/') . '/Core/libs/Model.php';
@@ -48,7 +48,7 @@ class Migration extends Database
             }
         }
 
-        echo "---* Schema Synchronization Complete ($syncCount Models Synced) *---" . PHP_EOL . PHP_EOL;
+        Logger::Success("---* Schema Synchronization Complete ($syncCount Models Synced) *---");
 	}
 
     private function getPhpFiles($dir) {
@@ -72,7 +72,7 @@ class Migration extends Database
         // Derive table name
         $tableName = $this->resolveTableName($reflection);
 
-        echo "=> Syncing schema for table: $tableName (Model: {$reflection->getShortName()})\n";
+        Logger::Info("=> Syncing schema for table: $tableName (Model: {$reflection->getShortName()})");
 
         // Build desired schema from model attributes
         $desiredColumns = $this->buildDesiredSchema($reflection);
@@ -351,9 +351,9 @@ class Migration extends Database
 
         // --- DROP columns ---
         if (!empty($diff['drop'])) {
-            echo "\n   [WARNING] The following columns exist in the database but NOT in the model:\n";
+            Logger::Warning("The following columns exist in the database but NOT in the model:");
             foreach ($diff['drop'] as $colName => $colDef) {
-                echo "     - `$colName` ({$colDef['type']})\n";
+                echo "     - `$colName` ({$colDef['type']})" . PHP_EOL;
             }
 
             echo "   Drop these columns? (y/N): ";
@@ -369,7 +369,7 @@ class Migration extends Database
         }
 
         if (!$hasChanges) {
-            echo "   [OK] Table `$tableName` is already in sync.\n";
+            Logger::Success("Table `$tableName` is already in sync.");
         }
     }
 
@@ -384,14 +384,14 @@ class Migration extends Database
                     $sql .= ' UNIQUE';
                 }
                 $this->exec("ALTER TABLE `$tableName` ADD COLUMN $sql");
-                echo "   [SUCCESS] $tableName -> ADD COLUMN `$colName` (SQLite)\n";
+                Logger::Success("$tableName -> ADD COLUMN `$colName` (SQLite)");
             }
             if (empty($diff['add'])) {
-                echo "   [OK] Table `$tableName` is already in sync.\n";
+                Logger::Success("Table `$tableName` is already in sync.");
             }
         } else {
             // Complex change: Recreate table
-            echo "   [INFO] Recreating SQLite table `$tableName` to apply modifications/drops...\n";
+            Logger::Info("Recreating SQLite table `$tableName` to apply modifications/drops...");
             
             $existingColumns = array_keys($this->getExistingColumns($tableName));
             $desiredColumnsForCreation = $this->buildDesiredSchema(new ReflectionClass($this->getCurrentModelClass($tableName)));
@@ -408,7 +408,7 @@ class Migration extends Database
             $this->exec("DROP TABLE `$tableName` ");
             $this->exec("ALTER TABLE `$tempTable` RENAME TO `$tableName` ");
             
-            echo "   [SUCCESS] $tableName -> Refactored table structure (SQLite)\n";
+            Logger::Success("$tableName -> Refactored table structure (SQLite)");
         }
     }
 
@@ -452,9 +452,9 @@ class Migration extends Database
     private function executeAlter(string $tableName, string $sql, string $description): void {
         try {
             $this->exec($sql);
-            echo "   [SUCCESS] $tableName -> $description\n";
+            Logger::Success("$tableName -> $description");
         } catch (PDOException $e) {
-            echo "   [ERROR] $tableName -> $description: " . $e->getMessage() . "\n";
+            Logger::Error("$tableName -> $description: " . $e->getMessage());
         }
     }
 
@@ -567,9 +567,9 @@ class Migration extends Database
 
         try {
             $this->exec($sql);
-            echo "   [SUCCESS] Created table `$tableName`\n";
+            Logger::Success("Created table `$tableName` ");
         } catch (PDOException $e) {
-            echo "   [ERROR] Failed to create `$tableName`: " . $e->getMessage() . "\n";
+            Logger::Error("Failed to create `$tableName`: " . $e->getMessage());
         }
     }
 }

@@ -177,13 +177,13 @@ class Database extends PDO
 			throw new Exception("Migrations can only be run from the Command Line Interface.");
 		}
 
-		echo "Creating migration table... \n";
+		Logger::Info("Creating migration table...");
 		$this->createMigrationTable();
 		
-		echo "Fetching applied migrations... \n";
+		Logger::Info("Fetching applied migrations...");
 		$appliedMig = $this->getAppliedMigrations();
 
-		echo "Scanning for new migrations in: $value/Migrations \n";
+		Logger::Info("Scanning for new migrations in: $value/Migrations");
 		$migrationDir = $value . '/Migrations';
 		
 		if (!is_dir($migrationDir)) {
@@ -206,17 +206,17 @@ class Database extends PDO
 			}
 
 			$instance = new $className();
-			echo "Applying migration: $migration \n";
+			Logger::Info("Applying migration: $migration");
 			$instance->up();
-			echo " -> $migration applied successfully.\n";
+			Logger::Success("Migration $migration applied successfully.");
 			$this->newMigrations[] = $migration;
 		}
 		
 		if (!empty($this->newMigrations)) {
 			$this->saveMigrations();
-			echo "All new migrations saved. \n";
+			Logger::Success("All new migrations saved.");
 		} else {
-			echo "All migrations are already up to date. \n";
+			Logger::Info("All migrations are already up to date.");
 		}
 	}
 

@@ -1,3 +1,32 @@
+## [2.2.0] — 2026-04-02 — Unified Logger & CLI Standardization
+
+This release introduces a sophisticated `Logger` class for cross-environment feedback and standardizes all terminal output for a professional developer experience.
+
+---
+
+### 📝 Unified Logger Class
+
+**New File** `Core/libs/Logger.php`
+- **Environment Detection**: Automatically switches between ANSI colored output (CLI) and styled HTML `<span>` tags (Web).
+- **Professional Formatting**: Standardized methods for `Info` (Cyan), `Success` (Green), `Warning` (Yellow), and `Error` (Red).
+- **Backward Compatibility**: Introduced a native `Log` alias to ensure existing code remains functional.
+
+---
+
+### 🖥️ CLI Output Standardization
+
+**Modified** `Core/libs/Migration.php`
+- Replaced all raw `echo` status markers (`[SUCCESS]`, `[ERROR]`, `[INFO]`, `[WARNING]`) with the new `Logger` class.
+- Improved visual scanning for model registrations and table synchronizations.
+
+**Modified** `Core/libs/Database.php`
+- Updated the `applyMigration` method to use professional colored logging for migration table status, scans, and results.
+
+**Modified** `Core/libs/Helper.php`
+- Refactored `LoadConfig()` and `SetConfig()` to provide high-visibility error alerts and success notifications.
+
+---
+
 ## [2.1.0] — 2026-04-01 — Database Driver & Migration Refactor
 
 Thin release consolidates the database connection layer to support multiple PDO-compatible drivers (MySQL & SQLite) through a unified `Database` class, and upgrades the Migration Engine to be fully driver-aware.
@@ -17,6 +46,19 @@ Thin release consolidates the database connection layer to support multiple PDO-
 
 **Modified** `Core/libs/Model.php`
 - Removed dependency on `PortableDB`. All models now utilize the unified `Database` connection.
+
+---
+
+### 📂 File Management & Uploader Refactor
+
+**Modified** `Core/libs/Uploader.php`
+- **Fluent API**: Refactored the class to be object-oriented and configurable via a fluent API (e.g. `setAllowed()`, `setMaxSize()`).
+- **MD5-Based Deduplication**: Automatically detects duplicate content using file hashing to prevent redundant storage.
+- **Static Helpers**: Introduced static methods for content-based filename generation (`getHashedName`), existence checks (`exists`), and file deletion (`delete`).
+- **Improved Validation**: Clear mapping of PHP upload errors onto human-readable messages.
+
+**Modified** `Core/libs/File.php`
+- Added `handleDir()` and `delete_file()` to improve filesystem interactions.
 
 ---
 
